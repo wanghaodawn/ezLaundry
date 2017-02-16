@@ -8,6 +8,7 @@ const mysql = require('mysql');
 var app = express();
 const port = 3000;
 
+// Configurate the connection to MySQL
 var connection = mysql.createConnection({
     host     : 'localhost',
     user     : 'root',
@@ -18,6 +19,7 @@ var connection = mysql.createConnection({
 // Possible return string for result
 const SUCCESS = 'SUCCESS';
 const FAIL = 'FAIL';
+const DUPLICATE_PRIMARY_KEY = 'DUPLICATE_PRIMARY_KEY';
 
 // Configuration
 hbs.registerPartials(__dirname + '/views/partials')
@@ -25,7 +27,7 @@ app.set('view engine', 'hbs');
 app.use(express.static(__dirname + '/public'));
 
 
-// Middleware
+// Middleware - Generate logs of the server
 app.use((req, res, next) => {
   var now = new Date().toString();
   var log = `${now}: ${req.method} ${req.url}`;
@@ -43,11 +45,12 @@ app.use((req, res, next) => {
 
 
 // RESTful APIs
+// User
 app.get('/api/add_user?', (req, res) => {
     var query = url.parse(req.url, true).query;
-    console.log(query);
+    // console.log(query);
     if (JSON.stringify(query) == '{}') {
-        console.log('null_query');
+        // console.log('null_query');
     } else {
         // Use escape to prevent from SQL Injection
         const user = {
@@ -62,16 +65,32 @@ app.get('/api/add_user?', (req, res) => {
             'country': connection.escape(toLowerCase(query.country))
         };
         console.log(user);
-        const queryString = 'INSERT INTO users SET ?;';
-        connection.query(queryString, user, function(err, rows) {
+        const queryString1 = 'SELECT COUNT(*) AS COUNT FROM users WHERE username=?;';
+        connection.query(queryString1, user.username, function(err, rows) {
             if (err) {
                 res.render('result.hbs', {
                     result: FAIL
                 });
             } else {
-                res.render('result.hbs', {
-                    result: SUCCESS
-                });
+                var count = rows[0].COUNT;
+                if (count != 0) {
+                    res.render('result.hbs', {
+                        result: DUPLICATE_PRIMARY_KEY
+                    });
+                } else {
+                    const queryString2 = 'INSERT INTO users SET ?;';
+                    connection.query(queryString2, user, function(err, rows) {
+                        if (err) {
+                            res.render('result.hbs', {
+                                result: FAIL
+                            });
+                        } else {
+                            res.render('result.hbs', {
+                                result: SUCCESS
+                            });
+                        }
+                    });
+                }
             }
         });
     }
