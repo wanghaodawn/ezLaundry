@@ -30,11 +30,12 @@ CREATE TABLE IF NOT EXISTS machines (
 
 -- Schedule
 CREATE TABLE IF NOT EXISTS schedules (
+    schedule_id INT NOT NULL AUTO_INCREMENT,
     username VARCHAR(40) NOT NULL,
     machine_id INT NOT NULL,
     start_time DATETIME NOT NULL,
-    end_time DATETIME,
-    PRIMARY KEY(username, machine_id, start_time),
+    end_time DATETIME NOT NULL,
+    PRIMARY KEY(schedule_id),
     FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE,
     FOREIGN KEY (machine_id) REFERENCES machines(machine_id) ON DELETE CASCADE
 );
@@ -42,9 +43,10 @@ CREATE TABLE IF NOT EXISTS schedules (
 
 -- Schedule without login
 CREATE TABLE IF NOT EXISTS schedules_annonymous (
+    schedule_id INT NOT NULL AUTO_INCREMENT,
     machine_id INT NOT NULL,
     start_time DATETIME NOT NULL,
     end_time DATETIME NOT NULL,
-    PRIMARY KEY(machine_id, start_time, end_time),
+    PRIMARY KEY(schedule_id),
     FOREIGN KEY (machine_id) REFERENCES machines(machine_id) ON DELETE CASCADE
 );
