@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- Machines
 -- machine_id is given by developers
 CREATE TABLE IF NOT EXISTS machines (
-    machine_id INT,
+    machine_id INT NOT NULL,
     idle_power FLOAT NOT NULL,
     running_time_minute INT NOT NULL,
     address VARCHAR(100),
