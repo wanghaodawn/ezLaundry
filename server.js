@@ -10,7 +10,7 @@ const bodyParser = require('body-parser');
 const usersModel = require('./usersModel.js');
 const machinesModel = require('./machinesModel.js');
 const schedulesAnnonymousModel = require('./schedulesAnnonymousModel.js');
-const schedules = require('./schedulesModel.js');
+const schedulesModel = require('./schedulesModel.js');
 const helper = require('./helper.js');
 
 var app = express();
@@ -52,7 +52,7 @@ app.use(session({
   activeDuration: 5 * 60 * 1000,
 }));
 
-// Body parser
+// Set body parser
 app.use(bodyParser.urlencoded({
     extended: true
 }));
@@ -206,6 +206,60 @@ app.get('/api/delete_all_machines?', (req, res) => {
 // Show all machines
 app.get('/api/show_all_machines?', (req, res) => {
     machinesModel.showAllMachines(connection, req, res, function(result) {
+        res.render('result.hbs', {
+            result: result
+        });
+    });
+});
+
+// Create a schedule_annonymous
+app.get('/api/add_schedule?', (req, res) => {
+    schedulesModel.createSchedule(connection, req, res, function(result) {
+        res.render('result.hbs', {
+            result: result
+        });
+    });
+});
+
+// Delete first n schedules annonymous
+app.get('/api/delete_first_n_schedule?', (req, res) => {
+    schedulesModel.deleteFirstNScheduleMachine(connection, req, res, function(result) {
+        res.render('result.hbs', {
+            result: result
+        });
+    });
+});
+
+// Delete last n schedules annonymous
+app.get('/api/delete_last_n_schedule?', (req, res) => {
+    schedulesModel.deleteLastNScheduleMachine(connection, req, res, function(result) {
+        res.render('result.hbs', {
+            result: result
+        });
+    });
+});
+
+// Delete all schedules annonymous of a machine
+app.get('/api/delete_machine_schedule?', (req, res) => {
+    schedulesModel.deleteSchedulesMachine(connection, req, res, function(result) {
+        res.render('result.hbs', {
+            result: result
+        });
+    });
+});
+
+// Delete all schedules annonymous
+app.get('/api/delete_all_schedule?', (req, res) => {
+    schedulesModel.deleteAllSchedules(connection, req, res, function(result) {
+        res.render('result.hbs', {
+            result: result
+        });
+    });
+});
+
+// Show all schedules annonymous of a machine
+app.get('/api/show_all_schedule?', (req, res) => {
+    schedulesModel.showAllSchedules(connection, req, res, function(result) {
         res.render('result.hbs', {
             result: result
         });

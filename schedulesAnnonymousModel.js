@@ -72,7 +72,7 @@ module.exports = {
                                     schedules_annonymous.start_time, schedules_annonymous.end_time,
                                     schedules_annonymous.start_time, schedules_annonymous.end_time], function(err, rows) {
                                     if (err) {
-                                        callback(FAIL);
+                                        callback(helper.FAIL);
                                     } else {
                                         var count = rows[0].COUNT;
                                         if (count != 0) {
