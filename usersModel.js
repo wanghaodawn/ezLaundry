@@ -166,5 +166,90 @@ module.exports = {
                 callback(helper.MISSING_REQUIRED_FIELDS);
             }
         }
+    },
+
+
+
+    login : function (connection, username, password, callback) {
+        username = connection.escape(helper.toLowerCase(username));
+        password = connection.escape(password);
+        const queryString1 = 'SELECT COUNT(*) AS COUNT FROM users WHERE username=?;';
+        // console.log(queryString1);
+        connection.query(queryString1, username, function(err, rows) {
+            if (err) {
+                callback({message: helper.FAIL, user: null});
+            } else {
+                var count = rows[0].COUNT;
+                if (count != 1) {
+                    // If find dumplicate primary keys in the database, return
+                    callback({message: helper.USER_DOESNT_EXISTS, user: null});
+                } else {
+                    // console.log(username);
+                    // console.log(password);
+                    const queryString2 = 'SELECT * FROM users WHERE username=?;';
+                    connection.query(queryString2, username, function(err, rows) {
+                        // console.log(err);
+                        if (err) {
+                            callback({message: helper.FAIL, user: null});
+                        } else {
+                            var originalPassword = rows[0].password;
+                            console.log(originalPassword);
+                            console.log(password);
+                            if (originalPassword != password) {
+                                callback({message: helper.WRONG_PASSWORD, user: null});
+                            } else {
+                                callback({message: helper.SUCCESS, user: rows[0]});
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    },
+
+
+
+    register : function (connection, inputUser, callback) {
+        const user = {
+            'username':     connection.escape(helper.toLowerCase(inputUser.username)),
+            'firstname':    connection.escape(helper.toLowerCase(inputUser.firstname)),
+            'lastname':     connection.escape(helper.toLowerCase(inputUser.lastname)),
+            'password':     connection.escape(inputUser.password),
+            'address':      connection.escape(helper.toLowerCase(inputUser.address)),
+            'zip':          connection.escape(helper.toLowerCase(inputUser.zip)),
+            'city':         connection.escape(helper.toLowerCase(inputUser.city)),
+            'state':        connection.escape(helper.toLowerCase(inputUser.state)),
+            'country':      connection.escape(helper.toLowerCase(inputUser.country))
+        };
+        const queryString1 = 'SELECT COUNT(*) AS COUNT FROM users WHERE username=?;';
+        // console.log(queryString1);
+        connection.query(queryString1, user.username, function(err, rows) {
+            if (err) {
+                callback({message: helper.FAIL, user: null});
+            } else {
+                var count = rows[0].COUNT;
+                if (count != 0) {
+                    // If find dumplicate primary keys in the database, return
+                    callback({message: helper.USERNAME_HAS_BEEN_TAKEN, user: null});
+                } else {
+                    const queryString2 = 'INSERT INTO users SET ?;';
+                    connection.query(queryString2, user, function(err, rows) {
+                        if (err) {
+                            callback({message: helper.FAIL, user: null});
+                        } else {
+                            const queryString3 = 'SELECT * FROM users WHERE username=?;';
+                            connection.query(queryString3, user.username, function(err, rows) {
+                                // console.log(err);
+                                if (err) {
+                                    callback({message: helper.FAIL, user: null});
+                                } else {
+                                    callback({message: helper.SUCCESS, user: rows[0]});
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        });
     }
 };

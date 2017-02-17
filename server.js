@@ -4,6 +4,8 @@ const fs = require('fs');
 const url = require('url');
 const mysql = require('mysql');
 const moment = require('moment');
+const session = require('client-sessions');
+const bodyParser = require('body-parser');
 
 const usersModel = require('./usersModel.js');
 const machinesModel = require('./machinesModel.js');
@@ -40,6 +42,100 @@ app.use((req, res, next) => {
     }
   });
   next();
+});
+
+// Configuration of session
+app.use(session({
+  cookieName: 'session',
+  secret: 'random_string_goes_here',
+  duration: 30 * 60 * 1000,
+  activeDuration: 5 * 60 * 1000,
+}));
+
+// Body parser
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+app.use(bodyParser.json());
+
+// Web Server
+app.get('/', (req, res) => {
+    const user = req.session.user;
+    console.log(JSON.stringify(req.session.user));
+    if (!user) {
+        res.redirect('/login');
+    } else {
+        res.render('dashboard.hbs', {
+            result: '',
+            user: user
+        });
+    }
+});
+
+app.get('/login', (req, res) => {
+    const user = req.session.user;
+    console.log(JSON.stringify(req.session.user));
+    if (!user) {
+        res.render('login.hbs', {});
+    } else {
+        redirect('/');
+    }
+});
+
+app.post('/login', (req, res) => {
+    const username = req.body.username;
+    const password = req.body.password;
+    usersModel.login(connection, username, password, function(result) {
+        // console.log(result);
+        if (!result.user) {
+            res.render('login.hbs', {
+                message: result.message
+            });
+        } else {
+            req.session.user = result.user;
+            res.redirect('/');
+        }
+    });
+});
+
+app.get('/register', (req, res) => {
+    const user = req.session.user;
+    console.log(JSON.stringify(req.session.user));
+    if (!user) {
+        res.render('register.hbs', {});
+    } else {
+        redirect('/');
+    }
+});
+
+app.post('/register', (req, res) => {
+    const inputUser = {
+        username:   req.body.username,
+        password:   req.body.password,
+        firstname:  req.body.password,
+        lastname:   req.body.password,
+        address:    req.body.address,
+        zip:        req.body.zip,
+        city:       req.body.city,
+        state:      req.body.state,
+        country:    req.body.state,
+    };
+    usersModel.register(connection, inputUser, function(result) {
+        console.log(result);
+        if (!result.user) {
+            res.render('register.hbs', {
+                message: result.message
+            });
+        } else {
+            req.session.user = result.user;
+            res.redirect('/');
+        }
+    });
+});
+
+app.get('/logout', (req, res) => {
+    req.session.user = null;
+    res.redirect('/');
 });
 
 
