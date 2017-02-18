@@ -12,6 +12,9 @@ module.exports = {
     USER_DOESNT_EXISTS: 'USER_DOESNT_EXISTS',
     WRONG_PASSWORD: 'WRONG_PASSWORD',
     USERNAME_HAS_BEEN_TAKEN: 'USERNAME_HAS_BEEN_TAKEN',
+    MACHINE_IS_SLEEPING_NOW: 'MACHINE_IS_SLEEPING_NOW',
+    MACHINE_IS_WORKING_NOW: 'MACHINE_IS_WORKING_NOW',
+    MISSING_FIELDS_OF_USER_ADDRESS: 'MISSING_FIELDS_OF_USER_ADDRESS',
     // If the string is not null, then change it to lowercase
     toLowerCase : function (s) {
         if (s) {

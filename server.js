@@ -12,6 +12,7 @@ const machinesModel = require('./machinesModel.js');
 const schedulesAnnonymousModel = require('./schedulesAnnonymousModel.js');
 const schedulesModel = require('./schedulesModel.js');
 const helper = require('./helper.js');
+const dashboard = require('./dashboard.js');
 
 var app = express();
 const port = 3000;
@@ -59,29 +60,35 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 
 // Web Server
+// Dashboard
 app.get('/', (req, res) => {
     const user = req.session.user;
-    console.log(JSON.stringify(req.session.user));
+    // console.log(JSON.stringify(req.session.user));
     if (!user) {
         res.redirect('/login');
     } else {
-        res.render('dashboard.hbs', {
-            result: '',
-            user: user
-        });
+        dashboard.showDashboard(connection, user, function(result) {
+            console.log(result.schedules);
+            res.render('dashboard.hbs', {
+                user: JSON.stringify(user, undefined, 2),
+                schedules: JSON.stringify(result.schedules, undefined, 2)
+            });
+        })
     }
 });
 
+// Login page
 app.get('/login', (req, res) => {
     const user = req.session.user;
-    console.log(JSON.stringify(req.session.user));
+    // console.log(JSON.stringify(req.session.user));
     if (!user) {
         res.render('login.hbs', {});
     } else {
-        redirect('/');
+        res.redirect('/');
     }
 });
 
+// Login action
 app.post('/login', (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
@@ -98,6 +105,7 @@ app.post('/login', (req, res) => {
     });
 });
 
+// Register page
 app.get('/register', (req, res) => {
     const user = req.session.user;
     console.log(JSON.stringify(req.session.user));
@@ -108,17 +116,18 @@ app.get('/register', (req, res) => {
     }
 });
 
+// Register action
 app.post('/register', (req, res) => {
     const inputUser = {
         username:   req.body.username,
         password:   req.body.password,
-        firstname:  req.body.password,
-        lastname:   req.body.password,
+        firstname:  req.body.firstname,
+        lastname:   req.body.lastname,
         address:    req.body.address,
         zip:        req.body.zip,
         city:       req.body.city,
         state:      req.body.state,
-        country:    req.body.state,
+        country:    req.body.country,
     };
     usersModel.register(connection, inputUser, function(result) {
         console.log(result);
@@ -133,6 +142,7 @@ app.post('/register', (req, res) => {
     });
 });
 
+// logout action
 app.get('/logout', (req, res) => {
     req.session.user = null;
     res.redirect('/');
