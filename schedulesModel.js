@@ -2,7 +2,7 @@ const express = require('express');
 const hbs = require('hbs');
 const fs = require('fs');
 const url = require('url');
-const moment = require('moment');
+const moment = require('moment-timezone');
 
 const helper = require('./helper.js');
 
@@ -24,7 +24,7 @@ module.exports = {
             }
             // Get current time in the timezone of the server
             const start_date = new Date();
-            const start_time = moment(start_date).format('YYYY-MM-DD HH:mm:ss');
+            const start_time = moment(start_date).tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
             const username = connection.escape(helper.toLowerCase(query.username));
 
             // console.log(query.machine_id);
@@ -62,7 +62,7 @@ module.exports = {
                                             // console.log(rows[0]);
                                             var running_time_minute = rows[0].running_time_minute;
                                             const end_date = start_date.setMinutes(start_date.getMinutes() + running_time_minute);
-                                            const end_time = moment(end_date).format('YYYY-MM-DD HH:mm:ss');
+                                            const end_time = moment(end_date).tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
                                             // console.log(start_time);
                                             // console.log(end_time);
                                             // Use escape to prevent from SQL Injection

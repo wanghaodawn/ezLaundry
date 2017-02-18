@@ -2,7 +2,7 @@ const express = require('express');
 const hbs = require('hbs');
 const fs = require('fs');
 const url = require('url');
-const moment = require('moment');
+const moment = require('moment-timezone');
 
 const usersModel = require('./usersModel.js');
 const machinesModel = require('./machinesModel.js');
@@ -28,18 +28,23 @@ module.exports = {
                     var schedules = [];
                     // console.log(rows);
                     var times = 0;
+                    const curr_date = new Date();
+                    const curr_time = moment(curr_date).tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
                     for (var i = 0; i < rows.length; i++) {
                         // Find schedules of each machine
                         var machine_id = rows[i].machine_id;
-                        const queryString2 = 'SELECT * FROM schedules_annonymous WHERE machine_id=?';
-                        connection.query(queryString2, machine_id, function(err, rows2) {
+                        const queryString2 = 'SELECT * FROM schedules_annonymous WHERE machine_id=? AND (DATE(start_time)=DATE(?) OR DATE(end_time)=DATE(?));';
+                        connection.query(queryString2, [machine_id, curr_time, curr_time], function(err, rows2) {
                             if (err) {
                                 // Fail, return
                             } else {
                                 // console.log(rows2);
-                                schedules.push(rows2);
+                                for (var j = 0; j < rows2.length; j++) {
+                                    schedules.push(rows2[j]);
+                                }
                                 // If this is the last time of the iteration, then callback
                                 if (times == rows.length - 1) {
+                                    // console.log(schedules);
                                     callback({message: helper.SUCCESS, schedules: schedules});
                                 }
                                 times += 1;

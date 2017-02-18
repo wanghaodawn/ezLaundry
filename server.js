@@ -3,7 +3,7 @@ const hbs = require('hbs');
 const fs = require('fs');
 const url = require('url');
 const mysql = require('mysql');
-const moment = require('moment');
+const moment = require('moment-timezone');
 const session = require('client-sessions');
 const bodyParser = require('body-parser');
 
@@ -16,6 +16,8 @@ const dashboard = require('./dashboard.js');
 
 var app = express();
 const port = 3000;
+
+process.env.TZ = 'EST'
 
 // Configurate the connection to MySQL
 var connection = mysql.createConnection({
@@ -68,7 +70,7 @@ app.get('/', (req, res) => {
         res.redirect('/login');
     } else {
         dashboard.showDashboard(connection, user, function(result) {
-            console.log(result.schedules);
+            // console.log(result.schedules);
             res.render('dashboard.hbs', {
                 user: JSON.stringify(user, undefined, 2),
                 schedules: JSON.stringify(result.schedules, undefined, 2)
