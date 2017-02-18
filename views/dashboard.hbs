@@ -1,9 +1,50 @@
+<script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+
 <div>success</div>
 <div>current user:</div>
 <pre>{{user}}</pre>
 <div>schedules in the user's building:</div>
-<pre>{{schedules}}</pre>
 
+<div id="div_schedules" style="display: none;">{{schedules}}</div>
+
+<script>
+    var schedules = JSON.parse($('#div_schedules').text());
+    if (schedules) {
+        var output = '';
+        for (var i = 0; i < schedules.length; i++) {
+            output += '<ul>';
+            output += '<a href="delete_schedule_by_id?schedule_id=' + schedules[i].schedule_id + '"><li>' + schedules[i].schedule_id + '</li></a>';
+            output += '<li>' + schedules[i].machine_id + '</li>';
+            output += '<li>' + schedules[i].start_time + '</li>';
+            output += '<li>' + schedules[i].end_time + '</li>';
+            output += '</ul>';
+        }
+        $('body').append(output);
+    }
+</script>
+
+<!--
+<script type="text/javascript">
+    console.log(this.body.schedules);
+    var tbody = document.getElementById('tbody');
+    var output = '';
+    for (var i = 0; i < schedules.length; i++) {
+        output += '<ul>';
+        output += '<a href=' + schedules[i].schedule_id + '><li>' + schedules[i].schedule_id + '</li></a>';
+        output += '<li>' + schedules[i].machine_id + '</li>';
+        output += '<li>' + schedules[i].start_time + '</li>';
+        output += '<li>' + schedules[i].end_time + '</li>';
+        output += '</ul>';
+    }
+    console.log(output);
+    tbody.append(output.join(''));
+</script> -->
+
+<form action="/change_info" method="GET">
+    <div>
+        <input type="submit" value="Change Info"/>
+    </div>
+</form>
 <form action="/logout" method="GET">
     <div>
         <input type="submit" value="logout"/>

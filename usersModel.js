@@ -251,5 +251,67 @@ module.exports = {
                 }
             }
         });
+    },
+
+
+
+
+    changeInfo : function (connection, inputUser, originalUser, callback) {
+        const password = connection.escape(inputUser.password);
+        const newPassword = connection.escape(inputUser.newPassword);
+        const confirmPassword = connection.escape(inputUser.confirmPassword);
+        const username = connection.escape(originalUser.username);
+        console.log(username);
+        if (newPassword != confirmPassword) {
+            callback({message: helper.TWO_PASSWORDS_DOESNT_MATCH, user: originalUser});
+        } else {
+            this.login(connection, originalUser.username, inputUser.password, function(result) {
+                console.log(result);
+                if (result.message != helper.SUCCESS) {
+                    callback({message: helper.WRONG_PASSWORD, user: originalUser});
+                } else {
+                    // If the password is correct, then update the user's info
+                    const user = {
+                        'firstname':        connection.escape(helper.toLowerCase(inputUser.firstname)),
+                        'lastname':         connection.escape(helper.toLowerCase(inputUser.lastname)),
+                        'password':         connection.escape(newPassword),
+                        'address':          connection.escape(helper.toLowerCase(inputUser.address)),
+                        'zip':              connection.escape(helper.toLowerCase(inputUser.zip)),
+                        'city':             connection.escape(helper.toLowerCase(inputUser.city)),
+                        'state':            connection.escape(helper.toLowerCase(inputUser.state)),
+                        'country':          connection.escape(helper.toLowerCase(inputUser.country))
+                    };
+                    const queryString2 = 'UPDATE users SET ? WHERE username=?;';
+                    connection.query(queryString2, [user, username], function(err, rows) {
+                        if (err) {
+                            callback({message: helper.FAIL, user: originalUser});
+                        } else {
+                            const queryString3 = 'SELECT * FROM users WHERE username=?;';
+                            connection.query(queryString3, username, function(err, rows) {
+                                // console.log(err);
+                                if (err) {
+                                    callback({message: helper.FAIL, user: originalUser});
+                                } else {
+                                    callback({message: helper.SUCCESS, user: stripUser(rows[0])});
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
     }
 };
+
+
+function stripUser (user) {
+    user.username = helper.stripString(user.username);
+    user.firstname = helper.stripString(user.firstname);
+    user.lastname = helper.stripString(user.lastname);
+    user.address = helper.stripString(user.address);
+    user.zip = helper.stripString(user.zip);
+    user.city = helper.stripString(user.city);
+    user.state = helper.stripString(user.state);
+    user.country = helper.stripString(user.country);
+    return user;
+}

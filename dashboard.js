@@ -51,6 +51,7 @@ module.exports = {
                             }
                         });
                     }
+                    callback({message: helper.SUCCESS, schedules: null});
                 }
             });
         }

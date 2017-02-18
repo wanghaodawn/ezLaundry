@@ -15,10 +15,24 @@ module.exports = {
     MACHINE_IS_SLEEPING_NOW: 'MACHINE_IS_SLEEPING_NOW',
     MACHINE_IS_WORKING_NOW: 'MACHINE_IS_WORKING_NOW',
     MISSING_FIELDS_OF_USER_ADDRESS: 'MISSING_FIELDS_OF_USER_ADDRESS',
+    TWO_PASSWORDS_DOESNT_MATCH: 'TWO_PASSWORDS_DOESNT_MATCH',
     // If the string is not null, then change it to lowercase
     toLowerCase : function (s) {
         if (s) {
             return s.toLowerCase();
+        }
+        return s;
+    },
+
+    stripString : function (s) {
+        if (s) {
+            if (s.length >= 2 && s.charAt(0) == "'" && s.charAt(s.length - 1) == "'") {
+                return s.slice(1, s.length - 1);
+            } else if (s.length < 2) {
+                return "";
+            } else {
+                return s;
+            }
         }
         return s;
     }

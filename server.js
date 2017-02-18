@@ -65,7 +65,7 @@ app.use(bodyParser.json());
 // Dashboard
 app.get('/', (req, res) => {
     const user = req.session.user;
-    // console.log(JSON.stringify(req.session.user));
+    console.log(JSON.stringify(req.session.user));
     if (!user) {
         res.redirect('/login');
     } else {
@@ -73,7 +73,7 @@ app.get('/', (req, res) => {
             // console.log(result.schedules);
             res.render('dashboard.hbs', {
                 user: JSON.stringify(user, undefined, 2),
-                schedules: JSON.stringify(result.schedules, undefined, 2)
+                schedules: JSON.stringify(result.schedules)
             });
         })
     }
@@ -95,7 +95,7 @@ app.post('/login', (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
     usersModel.login(connection, username, password, function(result) {
-        // console.log(result);
+        console.log(result);
         if (!result.user) {
             res.render('login.hbs', {
                 message: result.message
@@ -136,6 +136,47 @@ app.post('/register', (req, res) => {
         if (!result.user) {
             res.render('register.hbs', {
                 message: result.message
+            });
+        } else {
+            req.session.user = result.user;
+            res.redirect('/');
+        }
+    });
+});
+
+// Change address
+app.get('/change_info', (req, res) => {
+    const user = req.session.user;
+    console.log(JSON.stringify(req.session.user));
+    if (!user) {
+        res.render('login.hbs', {});
+    } else {
+        res.render('changeInfo.hbs', {
+            user: req.session.user
+        });
+    }
+});
+
+app.post('/change_info', (req, res) => {
+    const inputUser = {
+        username:           req.session.user.username,
+        password:           req.body.password,
+        newPassword:        req.body.newPassword,
+        confirmPassword:    req.body.confirmPassword,
+        firstname:          req.body.firstname,
+        lastname:           req.body.lastname,
+        address:            req.body.address,
+        zip:                req.body.zip,
+        city:               req.body.city,
+        state:              req.body.state,
+        country:            req.body.country,
+    };
+    usersModel.changeInfo(connection, inputUser, req.session.user, function(result) {
+        console.log(result);
+        if (result.message != helper.SUCCESS) {
+            res.render('changeInfo.hbs', {
+                message: result.message,
+                user: req.session.user,
             });
         } else {
             req.session.user = result.user;
