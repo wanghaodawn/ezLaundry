@@ -79,6 +79,14 @@ app.get('/', (req, res) => {
     }
 });
 
+// test
+app.get('/testapi/test.json', (req, res) => {
+    var test = {
+        name: 'Hao Wang'
+    }
+    res.send(test);
+});
+
 // Login page
 app.get('/login', (req, res) => {
     const user = req.session.user;
