@@ -205,7 +205,18 @@ app.get('/logout', (req, res) => {
 app.get('/api/add_user?', (req, res) => {
     usersModel.createUser(connection, req, res, function(result) {
         res.render('result.hbs', {
-            result: result
+            message: result.message,
+            result: result.user
+        });
+    });
+});
+
+// Login a user
+app.get('/api/login_user?', (req, res) => {
+    usersModel.loginUser(connection, req, res, function(result) {
+        res.render('result.hbs', {
+            message: result.message,
+            result: result.user
         });
     });
 });
