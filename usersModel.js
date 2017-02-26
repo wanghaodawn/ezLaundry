@@ -21,15 +21,16 @@ module.exports = {
             }
             // Use escape to prevent from SQL Injection
             const user = {
-                'username':     connection.escape(helper.toLowerCase(query.username)),
-                'firstname':    connection.escape(helper.toLowerCase(query.firstname)),
-                'lastname':     connection.escape(helper.toLowerCase(query.lastname)),
-                'password':     connection.escape(query.password),
-                'address':      connection.escape(helper.toLowerCase(query.address)),
-                'zip':          connection.escape(helper.toLowerCase(query.zip)),
-                'city':         connection.escape(helper.toLowerCase(query.city)),
-                'state':        connection.escape(helper.toLowerCase(query.state)),
-                'country':      connection.escape(helper.toLowerCase(query.country))
+                'username':      connection.escape(helper.toLowerCase(query.username)),
+                'firstname':     connection.escape(helper.toLowerCase(query.firstname)),
+                'lastname':      connection.escape(helper.toLowerCase(query.lastname)),
+                'password':      connection.escape(query.password),
+                'apartment_name':connection.escape(helper.toLowerCase(query.apartment_name)),
+                'address':       connection.escape(helper.toLowerCase(query.address)),
+                'zip':           connection.escape(helper.toLowerCase(query.zip)),
+                'city':          connection.escape(helper.toLowerCase(query.city)),
+                'state':         connection.escape(helper.toLowerCase(query.state)),
+                'country':       connection.escape(helper.toLowerCase(query.country))
             };
             // console.log(user);
             const queryString1 = 'SELECT COUNT(*) AS COUNT FROM users WHERE username=?;';

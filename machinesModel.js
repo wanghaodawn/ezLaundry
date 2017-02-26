@@ -14,7 +14,7 @@ module.exports = {
             callback(helper.MISSING_REQUIRED_FIELDS);
         } else {
             // If any of the required fields is missing, then return
-            if (!query.machine_id || !query.idle_power || !query.running_time_minute) {
+            if (!query.machine_id || !query.idle_power || !query.running_time_minute || !query.machine_type) {
                 callback(helper.MISSING_REQUIRED_FIELDS);
             }
             // Check if the input numbers are in good format
@@ -27,6 +27,7 @@ module.exports = {
                 'machine_id':           query.machine_id,
                 'idle_power':           query.idle_power,
                 'running_time_minute':  query.running_time_minute,
+                'machine_type':         connection.escape(helper.toLowerCase(query.machine_type)),
                 'address':              connection.escape(helper.toLowerCase(query.address)),
                 'zip':                  connection.escape(helper.toLowerCase(query.zip)),
                 'city':                 connection.escape(helper.toLowerCase(query.city)),

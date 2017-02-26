@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
     city VARCHAR(40),
     state VARCHAR(40),
     country VARCHAR(40),
+    apartment_name VARCHAR(40),
     PRIMARY KEY(username)
 );
 
@@ -24,6 +25,7 @@ CREATE TABLE IF NOT EXISTS machines (
     city VARCHAR(40),
     state VARCHAR(40),
     country VARCHAR(40),
+    machine_type VARCHAR(10) NOT NULL,
     PRIMARY KEY(machine_id)
 );
 
