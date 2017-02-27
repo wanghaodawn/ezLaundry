@@ -350,15 +350,14 @@ module.exports = {
            console.log(machine_type);
 
         //    Get all schedules in this location
-           const queryString1 = 'SELECT s.schedule_id, s.machine_id, s.start_time, s.end_time\
-                                 FROM schedules_annonymous s, machines m \
+           const queryString1 = 'SELECT s.schedule_id, m.machine_id, s.start_time, s.end_time\
+                                 FROM schedules_annonymous s RIGHT JOIN machines m ON s.machine_id = m.machine_id \
                                  WHERE \
                                     m.latitude = ? AND m.longitude = ? \
                                     AND m.machine_type = ? \
                                     AND ( \
-                                        DATE(s.start_time) = DATE(?) OR DATE(s.end_time) = DATE(?) \
+                                        s.start_time IS NULL OR DATE(s.start_time) = DATE(?) OR DATE(s.end_time) = DATE(?) \
                                     ) \
-                                    AND s.machine_id = m.machine_id \
                                  ORDER BY s.end_time DESC;';
            connection.query(queryString1, [latitude, longitude, machine_type, now, now], function(err, rows) {
             //    console.log(err);

@@ -225,6 +225,7 @@ app.post('/api/add_user/', (req, res) => {
 app.post('/api/login_user/', (req, res) => {
     usersModel.loginUser(connection, req.body, res, function(result) {
         var output = JSON.stringify(helper.stripJSON(result));
+        console.log(output);
         res.send(output);
     });
 });

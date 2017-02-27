@@ -81,7 +81,7 @@ module.exports = {
                                             if (err) {
                                                 callback({message: helper.FAIL, user: null});
                                             } else {
-                                                callback({message: helper.SUCCESS, user: rows});
+                                                callback({message: helper.SUCCESS, user: rows[0]});
                                             }
                                         });
                                     }
@@ -136,7 +136,7 @@ module.exports = {
                                     if (originalPassword != user.password) {
                                         callback({message: helper.WRONG_PASSWORD, user: null});
                                     } else {
-                                        callback({message: helper.SUCCESS, user: rows});
+                                        callback({message: helper.SUCCESS, user: rows[0]});
                                     }
                                 }
                             });
