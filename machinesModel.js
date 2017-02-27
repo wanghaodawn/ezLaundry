@@ -187,7 +187,8 @@ module.exports = {
                         callback(helper.FAIL);
                     } else {
                         // Success
-                        callback(JSON.stringify(rows));
+                        result = helper.normalizeMachines(rows);
+                        callback(result);
                     }
                 });
             } else {

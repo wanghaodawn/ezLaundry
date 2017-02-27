@@ -30,6 +30,12 @@ module.exports = {
         return s;
     },
 
+    stripJSON : function (obj) {
+        // console.log(obj);
+        // return JSON.parse(JSON.stringify(obj).replace(/\\"/g, '').replace(/\'/g, ''));
+        return JSON.parse(JSON.stringify(obj).replace(/\'/g, ''));
+    },
+
     stripString : function (s) {
         if (s) {
             if (s.length >= 2 && s.charAt(0) == "'" && s.charAt(s.length - 1) == "'") {
@@ -72,5 +78,65 @@ module.exports = {
                 callback({message: 'FAIL'});
             }
         });
+    },
+
+
+    normalizeSchedulesAnn : function (rows) {
+        var result = [];
+        for (var i in rows) {
+            var dic = {};
+            dic.schedule_id = rows[i].schedule_id;
+            dic.start_time = rows[i].start_time;
+            dic.end_time = rows[i].end_time;
+            dic.machine_id = rows[i].machine_id;
+            result.push(dic);
+        }
+        return result;
+    },
+
+
+    normalizeSchedules : function (rows) {
+        var result = [];
+        for (var i in rows) {
+            var dic = {};
+            dic.schedule_id = rows[i].schedule_id;
+            dic.start_time = rows[i].start_time;
+            dic.end_time = rows[i].end_time;
+            dic.machine_id = rows[i].machine_id;
+            dic.username = rows[i].username;
+            result.push(dic);
+        }
+        return result;
+    },
+
+
+    normalizeMachines : function (rows) {
+        var result = [];
+        for (var i in rows) {
+            var dic = {};
+            dic.machine_id = rows[i].machine_id;
+            dic.idle_power = rows[i].idle_power;
+            dic.running_time_minute = rows[i].running_time_minute;
+            dic.longitude = rows[i].longitude;
+            dic.latitude = rows[i].latitude;
+            dic.machine_type = rows[i].machine_type;
+            result.push(dic);
+        }
+        return result;
+    },
+
+
+    normalizeUsers : function (rows) {
+        var result = [];
+        for (var i in rows) {
+            var dic = {};
+            dic.username = rows[i].username;
+            dic.password = rows[i].password;
+            dic.longitude = rows[i].longitude;
+            dic.latitude = rows[i].latitude;
+            dic.property_name = rows[i].property_name;
+            result.push(dic);
+        }
+        return result;
     }
 }

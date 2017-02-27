@@ -216,7 +216,7 @@ app.get('/logout', (req, res) => {
 // Create a user
 app.post('/api/add_user/', (req, res) => {
     usersModel.createUser(GoogleMapAPIKey, connection, req.body, res, function(result) {
-        var output = JSON.stringify(result);
+        var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });
 });
@@ -224,7 +224,7 @@ app.post('/api/add_user/', (req, res) => {
 // Login a user
 app.post('/api/login_user/', (req, res) => {
     usersModel.loginUser(connection, req.body, res, function(result) {
-        var output = JSON.stringify(result);
+        var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });
 });
@@ -232,7 +232,7 @@ app.post('/api/login_user/', (req, res) => {
 // Delte one user
 app.post('/api/delete_one_user/', (req, res) => {
     usersModel.deleteOneUser(connection, req.body, res, function(result) {
-        var output = JSON.stringify(result);
+        var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });
 });
@@ -240,7 +240,7 @@ app.post('/api/delete_one_user/', (req, res) => {
 // Delete all users
 app.post('/api/delete_all_users/', (req, res) => {
     usersModel.deleteAllUsers(connection, req.body, res, function(result) {
-        var output = JSON.stringify(result);
+        var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });
 });
@@ -248,7 +248,8 @@ app.post('/api/delete_all_users/', (req, res) => {
 // Show all users
 app.post('/api/show_all_users/', (req, res) => {
     usersModel.showAllUsers(connection, req.body, res, function(result) {
-        var output = JSON.stringify(result);
+        var output = JSON.stringify(helper.stripJSON(result));
+        // console.log(output);
         res.send(output);
     });
 });
@@ -256,7 +257,7 @@ app.post('/api/show_all_users/', (req, res) => {
 // Create a machine
 app.post('/api/add_machine/', (req, res) => {
     machinesModel.createMachine(GoogleMapAPIKey, connection, req.body, res, function(result) {
-        var output = JSON.stringify(result);
+        var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });
 });
@@ -264,7 +265,7 @@ app.post('/api/add_machine/', (req, res) => {
 // Delete one machine
 app.post('/api/delete_one_machine/', (req, res) => {
     machinesModel.deleteOneMachine(connection, req.body, res, function(result) {
-        var output = JSON.stringify(result);
+        var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });
 });
@@ -272,7 +273,7 @@ app.post('/api/delete_one_machine/', (req, res) => {
 // Delete all machines
 app.post('/api/delete_all_machines/', (req, res) => {
     machinesModel.deleteAllMachines(connection, req.body, res, function(result) {
-        var output = JSON.stringify(result);
+        var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });
 });
@@ -280,7 +281,7 @@ app.post('/api/delete_all_machines/', (req, res) => {
 // Show all machines
 app.post('/api/show_all_machines/', (req, res) => {
     machinesModel.showAllMachines(connection, req.body, res, function(result) {
-        var output = JSON.stringify(result);
+        var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });
 });
@@ -288,7 +289,7 @@ app.post('/api/show_all_machines/', (req, res) => {
 // Create a schedule_annonymous
 app.post('/api/add_schedule/', (req, res) => {
     schedulesModel.createSchedule(connection, req.body, res, function(result) {
-        var output = JSON.stringify(result);
+        var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });
 });
@@ -296,7 +297,7 @@ app.post('/api/add_schedule/', (req, res) => {
 // Delete first n schedules annonymous
 app.post('/api/delete_first_n_schedule/', (req, res) => {
     schedulesModel.deleteFirstNScheduleMachine(connection, req.body, res, function(result) {
-        var output = JSON.stringify(result);
+        var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });
 });
@@ -304,7 +305,7 @@ app.post('/api/delete_first_n_schedule/', (req, res) => {
 // Delete last n schedules annonymous
 app.post('/api/delete_last_n_schedule/', (req, res) => {
     schedulesModel.deleteLastNScheduleMachine(connection, req.body, res, function(result) {
-        var output = JSON.stringify(result);
+        var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });
 });
@@ -312,7 +313,7 @@ app.post('/api/delete_last_n_schedule/', (req, res) => {
 // Delete all schedules annonymous of a machine
 app.post('/api/delete_machine_schedule/', (req, res) => {
     schedulesModel.deleteSchedulesMachine(connection, req.body, res, function(result) {
-        var output = JSON.stringify(result);
+        var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });
 });
@@ -320,7 +321,7 @@ app.post('/api/delete_machine_schedule/', (req, res) => {
 // Delete all schedules annonymous
 app.post('/api/delete_all_schedule/', (req, res) => {
     schedulesModel.deleteAllSchedules(connection, req.body, res, function(result) {
-        var output = JSON.stringify(result);
+        var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });
 });
@@ -328,7 +329,7 @@ app.post('/api/delete_all_schedule/', (req, res) => {
 // Show all schedules annonymous of a machine
 app.post('/api/show_all_schedule/', (req, res) => {
     schedulesModel.showAllSchedules(connection, req.body, res, function(result) {
-        var output = JSON.stringify(result);
+        var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });
 });
@@ -336,7 +337,7 @@ app.post('/api/show_all_schedule/', (req, res) => {
 // Create a schedule_annonymous
 app.post('/api/add_schedule_anonymous/', (req, res) => {
     schedulesAnnonymousModel.createSchedule(connection, req.body, res, function(result) {
-        var output = JSON.stringify(result);
+        var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });
 });
@@ -344,7 +345,7 @@ app.post('/api/add_schedule_anonymous/', (req, res) => {
 // Delete first n schedules annonymous
 app.post('/api/delete_first_n_schedule_anonymous/', (req, res) => {
     schedulesAnnonymousModel.deleteFirstNScheduleMachine(connection, req.body, res, function(result) {
-        var output = JSON.stringify(result);
+        var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });
 });
@@ -352,7 +353,7 @@ app.post('/api/delete_first_n_schedule_anonymous/', (req, res) => {
 // Delete last n schedules annonymous
 app.post('/api/delete_last_n_schedule_anonymous/', (req, res) => {
     schedulesAnnonymousModel.deleteLastNScheduleMachine(connection, req.body, res, function(result) {
-        var output = JSON.stringify(result);
+        var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });
 });
@@ -360,7 +361,7 @@ app.post('/api/delete_last_n_schedule_anonymous/', (req, res) => {
 // Delete all schedules annonymous of a machine
 app.post('/api/delete_machine_schedule_anonymous/', (req, res) => {
     schedulesAnnonymousModel.deleteSchedulesMachine(connection, req.body, res, function(result) {
-        var output = JSON.stringify(result);
+        var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });
 });
@@ -368,7 +369,7 @@ app.post('/api/delete_machine_schedule_anonymous/', (req, res) => {
 // Delete all schedules annonymous
 app.post('/api/delete_all_schedule_anonymous/', (req, res) => {
     schedulesAnnonymousModel.deleteAllSchedules(connection, req.body, res, function(result) {
-        var output = JSON.stringify(result);
+        var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });
 });
@@ -376,7 +377,7 @@ app.post('/api/delete_all_schedule_anonymous/', (req, res) => {
 // Show all schedules annonymous of a machine
 app.post('/api/show_all_schedule_anonymous/', (req, res) => {
     schedulesAnnonymousModel.showAllSchedules(connection, req.body, res, function(result) {
-        var output = JSON.stringify(result);
+        var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });
 });
@@ -384,7 +385,8 @@ app.post('/api/show_all_schedule_anonymous/', (req, res) => {
 // Show all schedules annonymous of the user's location and type
 app.post('/api/show_user_schedule_anonymous_type/', (req, res) => {
     schedulesAnnonymousModel.showAllSchedulesUserType(connection, req.body, res, function(result) {
-        var output = JSON.stringify(result);
+        console.log(result);
+        var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });
 });

@@ -307,7 +307,8 @@ module.exports = {
                        callback(helper.FAIL);
                    } else {
                        // Success
-                       callback(JSON.stringify(rows));
+                       result = helper.normalizeSchedulesAnn(rows);
+                       callback(JSON.stringify(result));
                    }
                });
            } else {
@@ -333,7 +334,7 @@ module.exports = {
     //    Get user's latitude and longitude
        const queryString0 = 'SELECT * FROM users WHERE username=?;';
        connection.query(queryString0, username, function(err, rows) {
-           console.log(err);
+        //    console.log(err);
            if (err) {
                return callback({message: helper.FAIL, schedules: null});
            }
@@ -360,12 +361,14 @@ module.exports = {
                                     AND s.machine_id = m.machine_id \
                                  ORDER BY s.end_time DESC;';
            connection.query(queryString1, [latitude, longitude, machine_type, now, now], function(err, rows) {
-               console.log(err);
-               console.log(rows);
+            //    console.log(err);
+            //    console.log(rows);
                if (err) {
                    return callback({message: helper.FAIL, schedules: null});
                }
-               return callback({message: helper.SUCCESS, schedules: rows});
+               result = helper.normalizeSchedulesAnn(rows);
+
+               return callback({message: helper.SUCCESS, schedules: result});
            });
        });
    }

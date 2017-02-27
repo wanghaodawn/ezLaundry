@@ -81,7 +81,8 @@ module.exports = {
                                             if (err) {
                                                 callback({message: helper.FAIL, user: null});
                                             } else {
-                                                callback({message: helper.SUCCESS, user: rows[0]});
+                                                result = helper.normalizeUsers(rows);
+                                                callback({message: helper.SUCCESS, user: result});
                                             }
                                         });
                                     }
@@ -136,7 +137,8 @@ module.exports = {
                                     if (originalPassword != user.password) {
                                         callback({message: helper.WRONG_PASSWORD, user: null});
                                     } else {
-                                        callback({message: helper.SUCCESS, user: rows[0]});
+                                        result = helper.normalizeUsers(rows);
+                                        callback({message: helper.SUCCESS, user: result});
                                     }
                                 }
                             });
@@ -245,7 +247,8 @@ module.exports = {
                         callback(helper.FAIL);
                     } else {
                         // Success
-                        callback(JSON.stringify(rows));
+                        result = helper.normalizeUsers(rows);
+                        callback(result);
                     }
                 });
             } else {

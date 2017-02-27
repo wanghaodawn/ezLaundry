@@ -321,7 +321,8 @@ module.exports = {
                        callback(helper.FAIL);
                    } else {
                        // Success
-                       callback(JSON.stringify(rows));
+                       result = helper.normalizeSchedulesAnn(rows);
+                       callback(result);
                    }
                });
            } else {
