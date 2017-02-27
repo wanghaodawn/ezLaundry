@@ -7,8 +7,7 @@ const moment = require('moment-timezone');
 const helper = require('./helper.js');
 
 module.exports = {
-    createSchedule : function (connection, req, res, callback) {
-        var query = url.parse(req.url, true).query;
+    createSchedule : function (connection, query, res, callback) {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
             // console.log('null_query');
@@ -109,8 +108,7 @@ module.exports = {
 
 
 
-    deleteFirstNScheduleMachine : function (connection, req, res, callback) {
-        var query = url.parse(req.url, true).query;
+    deleteFirstNScheduleMachine : function (connection, query, res, callback) {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
             // console.log('null_query');
@@ -157,8 +155,7 @@ module.exports = {
 
 
 
-    deleteLastNScheduleMachine : function (connection, req, res, callback) {
-        var query = url.parse(req.url, true).query;
+    deleteLastNScheduleMachine : function (connection, query, res, callback) {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
             // console.log('null_query');
@@ -205,8 +202,7 @@ module.exports = {
 
 
 
-    deleteSchedulesMachine : function (connection, req, res, callback) {
-        var query = url.parse(req.url, true).query;
+    deleteSchedulesMachine : function (connection, query, res, callback) {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
             // console.log('null_query');
@@ -251,8 +247,7 @@ module.exports = {
 
 
 
-    deleteAllSchedules : function (connection, req, res, callback) {
-        var query = url.parse(req.url, true).query;
+    deleteAllSchedules : function (connection, query, res, callback) {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
             // console.log('null_query');
@@ -284,8 +279,7 @@ module.exports = {
 
 
 
-   showAllSchedules : function (connection, req, res, callback) {
-       var query = url.parse(req.url, true).query;
+   showAllSchedules : function (connection, query, res, callback) {
        // console.log(query);
        if (JSON.stringify(query) == '{}') {
            // console.log('null_query');

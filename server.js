@@ -6,6 +6,7 @@ const mysql = require('mysql');
 const moment = require('moment-timezone');
 const session = require('client-sessions');
 const bodyParser = require('body-parser');
+const https = require('https');
 
 const usersModel = require('./usersModel.js');
 const machinesModel = require('./machinesModel.js');
@@ -202,193 +203,170 @@ app.get('/logout', (req, res) => {
 
 // RESTful APIs
 // Create a user
-app.get('/api/add_user?', (req, res) => {
-    usersModel.createUser(connection, req, res, function(result) {
-        res.render('result.hbs', {
-            message: result.message,
-            result: result.user
-        });
+app.post('/api/add_user/', (req, res) => {
+    usersModel.createUser(connection, req.body, res, function(result) {
+        var output = JSON.stringify(result);
+        res.send(output);
     });
 });
 
 // Login a user
-app.get('/api/login_user?', (req, res) => {
-    usersModel.loginUser(connection, req, res, function(result) {
-        res.render('result.hbs', {
-            message: result.message,
-            result: result.user
-        });
+app.post('/api/login_user/', (req, res) => {
+    usersModel.loginUser(connection, req.body, res, function(result) {
+        var output = JSON.stringify(result);
+        res.send(output);
     });
 });
 
 // Delte one user
-app.get('/api/delete_one_user?', (req, res) => {
-    usersModel.deleteOneUser(connection, req, res, function(result) {
-        res.render('result.hbs', {
-            result: result
-        });
+app.post('/api/delete_one_user/', (req, res) => {
+    usersModel.deleteOneUser(connection, req.body, res, function(result) {
+        var output = JSON.stringify(result);
+        res.send(output);
     });
 });
 
 // Delete all users
-app.get('/api/delete_all_users?', (req, res) => {
-    usersModel.deleteAllUsers(connection, req, res, function(result) {
-        res.render('result.hbs', {
-            result: result
-        });
+app.post('/api/delete_all_users/', (req, res) => {
+    usersModel.deleteAllUsers(connection, req.body, res, function(result) {
+        var output = JSON.stringify(result);
+        res.send(output);
     });
 });
 
 // Show all users
-app.get('/api/show_all_users?', (req, res) => {
-    usersModel.showAllUsers(connection, req, res, function(result) {
-        res.render('result.hbs', {
-            result: result
-        });
+app.post('/api/show_all_users/', (req, res) => {
+    usersModel.showAllUsers(connection, req.body, res, function(result) {
+        var output = JSON.stringify(result);
+        res.send(output);
     });
 });
 
 // Create a machine
-app.get('/api/add_machine?', (req, res) => {
-    machinesModel.createMachine(connection, req, res, function(result) {
-        res.render('result.hbs', {
-            result: result
-        });
+app.post('/api/add_machine/', (req, res) => {
+    machinesModel.createMachine(connection, req.body, res, function(result) {
+        var output = JSON.stringify(result);
+        res.send(output);
     });
 });
 
 // Delete one machine
-app.get('/api/delete_one_machine?', (req, res) => {
-    machinesModel.deleteOneMachine(connection, req, res, function(result) {
-        res.render('result.hbs', {
-            result: result
-        });
+app.post('/api/delete_one_machine/', (req, res) => {
+    machinesModel.deleteOneMachine(connection, req.body, res, function(result) {
+        var output = JSON.stringify(result);
+        res.send(output);
     });
 });
 
 // Delete all machines
-app.get('/api/delete_all_machines?', (req, res) => {
-    machinesModel.deleteAllMachines(connection, req, res, function(result) {
-        res.render('result.hbs', {
-            result: result
-        });
+app.post('/api/delete_all_machines/', (req, res) => {
+    machinesModel.deleteAllMachines(connection, req.body, res, function(result) {
+        var output = JSON.stringify(result);
+        res.send(output);
     });
 });
 
 // Show all machines
-app.get('/api/show_all_machines?', (req, res) => {
-    machinesModel.showAllMachines(connection, req, res, function(result) {
-        res.render('result.hbs', {
-            result: result
-        });
+app.post('/api/show_all_machines/', (req, res) => {
+    machinesModel.showAllMachines(connection, req.body, res, function(result) {
+        var output = JSON.stringify(result);
+        res.send(output);
     });
 });
 
 // Create a schedule_annonymous
-app.get('/api/add_schedule?', (req, res) => {
-    schedulesModel.createSchedule(connection, req, res, function(result) {
-        res.render('result.hbs', {
-            result: result
-        });
+app.post('/api/add_schedule/', (req, res) => {
+    schedulesModel.createSchedule(connection, req.body, res, function(result) {
+        var output = JSON.stringify(result);
+        res.send(output);
     });
 });
 
 // Delete first n schedules annonymous
-app.get('/api/delete_first_n_schedule?', (req, res) => {
-    schedulesModel.deleteFirstNScheduleMachine(connection, req, res, function(result) {
-        res.render('result.hbs', {
-            result: result
-        });
+app.post('/api/delete_first_n_schedule/', (req, res) => {
+    schedulesModel.deleteFirstNScheduleMachine(connection, req.body, res, function(result) {
+        var output = JSON.stringify(result);
+        res.send(output);
     });
 });
 
 // Delete last n schedules annonymous
-app.get('/api/delete_last_n_schedule?', (req, res) => {
-    schedulesModel.deleteLastNScheduleMachine(connection, req, res, function(result) {
-        res.render('result.hbs', {
-            result: result
-        });
+app.post('/api/delete_last_n_schedule/', (req, res) => {
+    schedulesModel.deleteLastNScheduleMachine(connection, req.body, res, function(result) {
+        var output = JSON.stringify(result);
+        res.send(output);
     });
 });
 
 // Delete all schedules annonymous of a machine
-app.get('/api/delete_machine_schedule?', (req, res) => {
-    schedulesModel.deleteSchedulesMachine(connection, req, res, function(result) {
-        res.render('result.hbs', {
-            result: result
-        });
+app.post('/api/delete_machine_schedule/', (req, res) => {
+    schedulesModel.deleteSchedulesMachine(connection, req.body, res, function(result) {
+        var output = JSON.stringify(result);
+        res.send(output);
     });
 });
 
 // Delete all schedules annonymous
-app.get('/api/delete_all_schedule?', (req, res) => {
-    schedulesModel.deleteAllSchedules(connection, req, res, function(result) {
-        res.render('result.hbs', {
-            result: result
-        });
+app.post('/api/delete_all_schedule/', (req, res) => {
+    schedulesModel.deleteAllSchedules(connection, req.body, res, function(result) {
+        var output = JSON.stringify(result);
+        res.send(output);
     });
 });
 
 // Show all schedules annonymous of a machine
-app.get('/api/show_all_schedule?', (req, res) => {
-    schedulesModel.showAllSchedules(connection, req, res, function(result) {
-        res.render('result.hbs', {
-            result: result
-        });
+app.post('/api/show_all_schedule/', (req, res) => {
+    schedulesModel.showAllSchedules(connection, req.body, res, function(result) {
+        var output = JSON.stringify(result);
+        res.send(output);
     });
 });
 
 // Create a schedule_annonymous
-app.get('/api/add_schedule_anonymous?', (req, res) => {
-    schedulesAnnonymousModel.createSchedule(connection, req, res, function(result) {
-        res.render('result.hbs', {
-            result: result
-        });
+app.post('/api/add_schedule_anonymous/', (req, res) => {
+    schedulesAnnonymousModel.createSchedule(connection, req.body, res, function(result) {
+        var output = JSON.stringify(result);
+        res.send(output);
     });
 });
 
 // Delete first n schedules annonymous
-app.get('/api/delete_first_n_schedule_anonymous?', (req, res) => {
-    schedulesAnnonymousModel.deleteFirstNScheduleMachine(connection, req, res, function(result) {
-        res.render('result.hbs', {
-            result: result
-        });
+app.post('/api/delete_first_n_schedule_anonymous/', (req, res) => {
+    schedulesAnnonymousModel.deleteFirstNScheduleMachine(connection, req.body, res, function(result) {
+        var output = JSON.stringify(result);
+        res.send(output);
     });
 });
 
 // Delete last n schedules annonymous
-app.get('/api/delete_last_n_schedule_anonymous?', (req, res) => {
-    schedulesAnnonymousModel.deleteLastNScheduleMachine(connection, req, res, function(result) {
-        res.render('result.hbs', {
-            result: result
-        });
+app.post('/api/delete_last_n_schedule_anonymous/', (req, res) => {
+    schedulesAnnonymousModel.deleteLastNScheduleMachine(connection, req.body, res, function(result) {
+        var output = JSON.stringify(result);
+        res.send(output);
     });
 });
 
 // Delete all schedules annonymous of a machine
-app.get('/api/delete_machine_schedule_anonymous?', (req, res) => {
-    schedulesAnnonymousModel.deleteSchedulesMachine(connection, req, res, function(result) {
-        res.render('result.hbs', {
-            result: result
-        });
+app.post('/api/delete_machine_schedule_anonymous/', (req, res) => {
+    schedulesAnnonymousModel.deleteSchedulesMachine(connection, req.body, res, function(result) {
+        var output = JSON.stringify(result);
+        res.send(output);
     });
 });
 
 // Delete all schedules annonymous
-app.get('/api/delete_all_schedule_anonymous?', (req, res) => {
-    schedulesAnnonymousModel.deleteAllSchedules(connection, req, res, function(result) {
-        res.render('result.hbs', {
-            result: result
-        });
+app.post('/api/delete_all_schedule_anonymous/', (req, res) => {
+    schedulesAnnonymousModel.deleteAllSchedules(connection, req.body, res, function(result) {
+        var output = JSON.stringify(result);
+        res.send(output);
     });
 });
 
 // Show all schedules annonymous of a machine
-app.get('/api/show_all_schedule_anonymous?', (req, res) => {
-    schedulesAnnonymousModel.showAllSchedules(connection, req, res, function(result) {
-        res.render('result.hbs', {
-            result: result
-        });
+app.post('/api/show_all_schedule_anonymous/', (req, res) => {
+    schedulesAnnonymousModel.showAllSchedules(connection, req.body, res, function(result) {
+        var output = JSON.stringify(result);
+        res.send(output);
     });
 });
 

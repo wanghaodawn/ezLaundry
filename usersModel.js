@@ -7,8 +7,7 @@ const moment = require('moment');
 const helper = require('./helper.js');
 
 module.exports = {
-    createUser : function (connection, req, res, callback) {
-        var query = url.parse(req.url, true).query;
+    createUser : function (connection, query, res, callback) {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
             // console.log('null_query');
@@ -67,8 +66,7 @@ module.exports = {
     },
 
 
-    loginUser : function (connection, req, res, callback) {
-        var query = url.parse(req.url, true).query;
+    loginUser : function (connection, query, res, callback) {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
             // console.log('null_query');
@@ -121,8 +119,7 @@ module.exports = {
 
 
 
-    deleteOneUser : function(connection, req, res, callback) {
-        var query = url.parse(req.url, true).query;
+    deleteOneUser : function(connection, query, res, callback) {
         console.log(query);
         if (JSON.stringify(query) == '{}') {
             callback(helper.MISSING_REQUIRED_FIELDS);
@@ -166,8 +163,7 @@ module.exports = {
 
 
 
-    deleteAllUsers : function(connection, req, res, callback) {
-        var query = url.parse(req.url, true).query;
+    deleteAllUsers : function(connection, query, res, callback) {
         console.log(query);
         if (JSON.stringify(query) == '{}') {
             callback(helper.MISSING_REQUIRED_FIELDS);
@@ -199,8 +195,7 @@ module.exports = {
 
 
     // Show all users
-    showAllUsers : function (connection, req, res, callback) {
-        var query = url.parse(req.url, true).query;
+    showAllUsers : function (connection, query, res, callback) {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
             // console.log('null_query');

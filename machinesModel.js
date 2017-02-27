@@ -7,8 +7,7 @@ const moment = require('moment');
 const helper = require('./helper.js');
 
 module.exports = {
-    createMachine : function (connection, req, res, callback) {
-        var query = url.parse(req.url, true).query;
+    createMachine : function (connection, query, res, callback) {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
             callback(helper.MISSING_REQUIRED_FIELDS);
@@ -63,8 +62,7 @@ module.exports = {
 
 
 
-    deleteOneMachine : function (connection, req, res, callback) {
-        var query = url.parse(req.url, true).query;
+    deleteOneMachine : function (connection, query, res, callback) {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
             // console.log('null_query');
@@ -112,8 +110,7 @@ module.exports = {
     },
 
 
-    deleteAllMachines : function (connection, req, res, callback) {
-        var query = url.parse(req.url, true).query;
+    deleteAllMachines : function (connection, query, res, callback) {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
             // console.log('null_query');
@@ -146,8 +143,7 @@ module.exports = {
 
 
     // Show all machines
-    showAllMachines : function (connection, req, res, callback) {
-        var query = url.parse(req.url, true).query;
+    showAllMachines : function (connection, query, res, callback) {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
             // console.log('null_query');
