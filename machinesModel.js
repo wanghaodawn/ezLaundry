@@ -7,7 +7,7 @@ const moment = require('moment');
 const helper = require('./helper.js');
 
 module.exports = {
-    createMachine : function (connection, query, res, callback) {
+    createMachine : function (GoogleMapAPIKey, connection, query, res, callback) {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
             callback(helper.MISSING_REQUIRED_FIELDS);
@@ -22,18 +22,13 @@ module.exports = {
                 callback(helper.INVALID_NUMBER_FORMAT);
             }
             // Use escape to prevent from SQL Injection
-            const machine = {
+            var machine = {
                 'machine_id':           query.machine_id,
                 'idle_power':           query.idle_power,
                 'running_time_minute':  query.running_time_minute,
-                'machine_type':         connection.escape(helper.toLowerCase(query.machine_type)),
-                'address':              connection.escape(helper.toLowerCase(query.address)),
-                'zip':                  connection.escape(helper.toLowerCase(query.zip)),
-                'city':                 connection.escape(helper.toLowerCase(query.city)),
-                'state':                connection.escape(helper.toLowerCase(query.state)),
-                'country':              connection.escape(helper.toLowerCase(query.country))
+                'machine_type':         connection.escape(helper.toLowerCase(query.machine_type))
             };
-            console.log(machine);
+            // console.log(machine);
             const queryString1 = 'SELECT COUNT(*) AS COUNT FROM machines WHERE machine_id=?;';
             connection.query(queryString1, machine.machine_id, function(err, rows) {
                 if (err) {
@@ -44,16 +39,42 @@ module.exports = {
                         // If find dumplicate primary keys in the database, return
                         callback(helper.DUPLICATE_PRIMARY_KEY);
                     } else {
-                        const queryString2 = 'INSERT INTO machines SET ?;';
-                        connection.query(queryString2, machine, function(err, rows) {
-                            if (err) {
-                                // Fail, return
-                                callback(helper.FAIL);
-                            } else {
-                                // Success
-                                callback(helper.SUCCESS);
-                            }
-                        });
+                        var res_message = '';
+                        if ('address' in query && 'city' in query ) {
+                            // Use escape to prevent from SQL Injection
+                            const address = helper.toLowerCase(query.address);
+                            const city = helper.toLowerCase(query.city);
+
+                            // Get user's desired apartment's latitude and longitude
+                            helper.getLocation(GoogleMapAPIKey, address, city, function(res) {
+                                res_message = res.message;
+                                if (res.message == helper.SUCCESS) {
+                                    machine['latitude'] = res.latitude;
+                                    machine['longitude'] = res.longitude;
+                                }
+                                const queryString2 = 'INSERT INTO machines SET ?;';
+                                connection.query(queryString2, machine, function(err, rows) {
+                                    if (err) {
+                                        // Fail, return
+                                        callback(helper.FAIL);
+                                    } else {
+                                        // Success
+                                        callback(helper.SUCCESS);
+                                    }
+                                });
+                            });
+                        } else {
+                            const queryString2 = 'INSERT INTO machines SET ?;';
+                            connection.query(queryString2, machine, function(err, rows) {
+                                if (err) {
+                                    // Fail, return
+                                    callback(helper.FAIL);
+                                } else {
+                                    // Success
+                                    callback(helper.SUCCESS);
+                                }
+                            });
+                        }
                     }
                 }
             });

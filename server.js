@@ -255,7 +255,7 @@ app.post('/api/show_all_users/', (req, res) => {
 
 // Create a machine
 app.post('/api/add_machine/', (req, res) => {
-    machinesModel.createMachine(connection, req.body, res, function(result) {
+    machinesModel.createMachine(GoogleMapAPIKey, connection, req.body, res, function(result) {
         var output = JSON.stringify(result);
         res.send(output);
     });

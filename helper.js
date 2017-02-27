@@ -20,6 +20,7 @@ module.exports = {
     MISSING_FIELDS_OF_USER_ADDRESS: 'MISSING_FIELDS_OF_USER_ADDRESS',
     TWO_PASSWORDS_DOESNT_MATCH: 'TWO_PASSWORDS_DOESNT_MATCH',
     NO_GOOGLE_MAP_API_KEY_FOUND: 'NO_GOOGLE_MAP_API_KEY_FOUND',
+    ZERO_RESULTS: 'ZERO_RESULTS',
     // If the string is not null, then change it to lowercase
     toLowerCase : function (s) {
         if (s) {
@@ -51,18 +52,21 @@ module.exports = {
         });
     },
 
-    getLocation : function (GoogleMapAPIKey, address, zip, city, state, country, callback) {
-        var url = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + address + ', ';
-        url += city + ', ' + state + ', ' + zip;
+    getLocation : function (GoogleMapAPIKey, address, city, callback) {
+        var url = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + address + ', ' + city;
         url = url.replace(/ /g, '+');
         url += '&key=' + GoogleMapAPIKey;
         console.log(url);
 
         var req = request.get({url: url, json: true}, function (error, response, body) {
             if (!error && response.statusCode === 200) {
-                const latitude = body['results'][0]['geometry']['location']['lat'];
-                const longitude = body['results'][0]['geometry']['location']['lng'];
-                callback({message: 'SUCCESS', latitude: latitude, longitude: longitude});
+                if (body['status'] == 'ZERO_RESULTS') {
+                    callback({message: 'ZERO_RESULTS'});
+                } else {
+                    const latitude = body['results'][0]['geometry']['location']['lat'];
+                    const longitude = body['results'][0]['geometry']['location']['lng'];
+                    callback({message: 'SUCCESS', latitude: latitude, longitude: longitude});
+                }
             } else {
                 callback({message: 'FAIL'});
             }

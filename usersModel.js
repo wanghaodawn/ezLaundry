@@ -36,16 +36,15 @@ module.exports = {
                             'password':      connection.escape(query.password),
                             'property_name': connection.escape(helper.toLowerCase(query.property_name)),
                         };
-                        if ('address' in query && 'zip' in query && 'city' in query && 'state' in query && 'country' in query) {
+                        var res_message = '';
+                        if ('address' in query &&'city' in query) {
                             // Use escape to prevent from SQL Injection
                             const address = helper.toLowerCase(query.address);
-                            const zip = helper.toLowerCase(query.zip);
                             const city = helper.toLowerCase(query.city);
-                            const state = helper.toLowerCase(query.state);
-                            const country = helper.toLowerCase(query.country);
 
                             // Get user's desired apartment's latitude and longitude
-                            helper.getLocation(GoogleMapAPIKey, address, zip, city, state, country, function(res) {
+                            helper.getLocation(GoogleMapAPIKey, address, city, function(res) {
+                                res_message = res.message;
                                 if (res.message == helper.SUCCESS) {
                                     user['latitude'] = res.latitude;
                                     user['longitude'] = res.longitude;
@@ -61,11 +60,32 @@ module.exports = {
                                             if (err) {
                                                 callback({message: helper.FAIL, user: null});
                                             } else {
-                                                callback({message: helper.SUCCESS, user: rows[0]});
+                                                if (res_message == helper.ZERO_RESULTS) {
+                                                    callback({message: helper.ZERO_RESULTS, user: rows[0]});
+                                                } else {
+                                                    callback({message: helper.SUCCESS, user: rows[0]});
+                                                }
                                             }
                                         });
                                     }
                                 });
+                            });
+                        } else {
+                            const queryString2 = 'INSERT INTO users SET ?;';
+                            connection.query(queryString2, user, function(err, rows) {
+                                if (err) {
+                                    callback({message: helper.FAIL, user: null});
+                                } else {
+                                    const queryString3 = 'SELECT * FROM users WHERE username=?;';
+                                    connection.query(queryString3, user.username, function(err, rows) {
+                                        // console.log(err);
+                                        if (err) {
+                                            callback({message: helper.FAIL, user: null});
+                                        } else {
+                                            callback({message: helper.SUCCESS, user: rows[0]});
+                                        }
+                                    });
+                                }
                             });
                         }
                     }
