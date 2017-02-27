@@ -21,6 +21,7 @@ module.exports = {
     TWO_PASSWORDS_DOESNT_MATCH: 'TWO_PASSWORDS_DOESNT_MATCH',
     NO_GOOGLE_MAP_API_KEY_FOUND: 'NO_GOOGLE_MAP_API_KEY_FOUND',
     ZERO_RESULTS: 'ZERO_RESULTS',
+    MACHINE_DOESNT_EXIST: 'MACHINE_DOESNT_EXIST',
     // If the string is not null, then change it to lowercase
     toLowerCase : function (s) {
         if (s) {

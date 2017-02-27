@@ -18,7 +18,7 @@ module.exports = {
                 callback(helper.MISSING_REQUIRED_FIELDS);
             } else {
                 // Check if the input numbers are in good format
-                if (isNaN(query.machine_id) || (isNaN(query.curr_power) && query.curr_power.toString.indexOf('.' != -1))) {
+                if (isNaN(query.machine_id) || (isNaN(query.curr_power))) {
                     callback(helper.INVALID_NUMBER_FORMAT);
                 } else {
                     // Get current time in the timezone of the server
@@ -315,5 +315,58 @@ module.exports = {
                callback(helper.MISSING_REQUIRED_FIELDS);
            }
        }
+   },
+
+
+   showAllSchedulesUserType : function (connection, query, res, callback) {
+       // console.log(query);
+       if (JSON.stringify(query) == '{}') {
+           // console.log('null_query');
+           return callback({message: helper.MISSING_REQUIRED_FIELDS, schedules: null});
+       }
+       if (!query.username || !query.machine_type) {
+           return callback({message: helper.MISSING_REQUIRED_FIELDS, schedules: null});
+       }
+       const username = connection.escape(helper.toLowerCase(query.username));
+       const machine_type = connection.escape(helper.toLowerCase(query.machine_type));
+
+    //    Get user's latitude and longitude
+       const queryString0 = 'SELECT * FROM users WHERE username=?;';
+       connection.query(queryString0, username, function(err, rows) {
+           console.log(err);
+           if (err) {
+               return callback({message: helper.FAIL, schedules: null});
+           }
+           if (rows.length == 0) {
+               return callback({message: helper.USER_DOESNT_EXISTS, schedules: null});
+           }
+           const latitude = rows[0].latitude;
+           const longitude = rows[0].longitude;
+           const now = moment(new Date()).tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
+           console.log(latitude);
+           console.log(longitude);
+           console.log(now);
+           console.log(machine_type);
+
+        //    Get all schedules in this location
+           const queryString1 = 'SELECT s.schedule_id, s.machine_id, s.start_time, s.end_time\
+                                 FROM schedules_annonymous s, machines m \
+                                 WHERE \
+                                    m.latitude = ? AND m.longitude = ? \
+                                    AND m.machine_type = ? \
+                                    AND ( \
+                                        DATE(s.start_time) = DATE(?) OR DATE(s.end_time) = DATE(?) \
+                                    ) \
+                                    AND s.machine_id = m.machine_id \
+                                 ORDER BY s.end_time DESC;';
+           connection.query(queryString1, [latitude, longitude, machine_type, now, now], function(err, rows) {
+               console.log(err);
+               console.log(rows);
+               if (err) {
+                   return callback({message: helper.FAIL, schedules: null});
+               }
+               return callback({message: helper.SUCCESS, schedules: rows});
+           });
+       });
    }
 }

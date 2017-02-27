@@ -381,6 +381,14 @@ app.post('/api/show_all_schedule_anonymous/', (req, res) => {
     });
 });
 
+// Show all schedules annonymous of the user's location and type
+app.post('/api/show_user_schedule_anonymous_type/', (req, res) => {
+    schedulesAnnonymousModel.showAllSchedulesUserType(connection, req.body, res, function(result) {
+        var output = JSON.stringify(result);
+        res.send(output);
+    });
+});
+
 // Start the server
 app.listen(port);
 console.log(`Starting server at localhost:${port}`);
