@@ -17,38 +17,59 @@ module.exports = {
             // If any of the required fields is missing, then return
             if (!query.username || !query.password || !query.property_name) {
                 callback({message: helper.MISSING_REQUIRED_FIELDS, user: null});
-            }
-
-            // console.log(user);
-            const queryString1 = 'SELECT COUNT(*) AS COUNT FROM users WHERE username=?;';
-            // console.log(queryString1);
-            connection.query(queryString1, connection.escape(helper.toLowerCase(query.username)), function(err, rows) {
-                if (err) {
-                    callback({message: helper.FAIL, user: null});
-                } else {
-                    var count = rows[0].COUNT;
-                    if (count != 0) {
-                        // If find dumplicate primary keys in the database, return
-                        callback({message: helper.DUPLICATE_PRIMARY_KEY, user: null});
+            } else {
+                // console.log(user);
+                const queryString1 = 'SELECT COUNT(*) AS COUNT FROM users WHERE username=?;';
+                // console.log(queryString1);
+                connection.query(queryString1, connection.escape(helper.toLowerCase(query.username)), function(err, rows) {
+                    if (err) {
+                        callback({message: helper.FAIL, user: null});
                     } else {
-                        var user = {
-                            'username':      connection.escape(helper.toLowerCase(query.username)),
-                            'password':      connection.escape(query.password),
-                            'property_name': connection.escape(helper.toLowerCase(query.property_name)),
-                        };
-                        var res_message = '';
-                        if ('address' in query &&'city' in query) {
-                            // Use escape to prevent from SQL Injection
-                            const address = helper.toLowerCase(query.address);
-                            const city = helper.toLowerCase(query.city);
+                        var count = rows[0].COUNT;
+                        if (count != 0) {
+                            // If find dumplicate primary keys in the database, return
+                            callback({message: helper.DUPLICATE_PRIMARY_KEY, user: null});
+                        } else {
+                            var user = {
+                                'username':      connection.escape(helper.toLowerCase(query.username)),
+                                'password':      connection.escape(query.password),
+                                'property_name': connection.escape(helper.toLowerCase(query.property_name)),
+                            };
+                            var res_message = '';
+                            if ('address' in query &&'city' in query) {
+                                // Use escape to prevent from SQL Injection
+                                const address = helper.toLowerCase(query.address);
+                                const city = helper.toLowerCase(query.city);
 
-                            // Get user's desired apartment's latitude and longitude
-                            helper.getLocation(GoogleMapAPIKey, address, city, function(res) {
-                                res_message = res.message;
-                                if (res.message == helper.SUCCESS) {
-                                    user['latitude'] = res.latitude;
-                                    user['longitude'] = res.longitude;
-                                }
+                                // Get user's desired apartment's latitude and longitude
+                                helper.getLocation(GoogleMapAPIKey, address, city, function(res) {
+                                    res_message = res.message;
+                                    if (res.message == helper.SUCCESS) {
+                                        user['latitude'] = res.latitude;
+                                        user['longitude'] = res.longitude;
+                                    }
+                                    const queryString2 = 'INSERT INTO users SET ?;';
+                                    connection.query(queryString2, user, function(err, rows) {
+                                        if (err) {
+                                            callback({message: helper.FAIL, user: null});
+                                        } else {
+                                            const queryString3 = 'SELECT * FROM users WHERE username=?;';
+                                            connection.query(queryString3, user.username, function(err, rows) {
+                                                // console.log(err);
+                                                if (err) {
+                                                    callback({message: helper.FAIL, user: null});
+                                                } else {
+                                                    if (res_message == helper.ZERO_RESULTS) {
+                                                        callback({message: helper.ZERO_RESULTS, user: rows[0]});
+                                                    } else {
+                                                        callback({message: helper.SUCCESS, user: rows[0]});
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    });
+                                });
+                            } else {
                                 const queryString2 = 'INSERT INTO users SET ?;';
                                 connection.query(queryString2, user, function(err, rows) {
                                     if (err) {
@@ -60,37 +81,16 @@ module.exports = {
                                             if (err) {
                                                 callback({message: helper.FAIL, user: null});
                                             } else {
-                                                if (res_message == helper.ZERO_RESULTS) {
-                                                    callback({message: helper.ZERO_RESULTS, user: rows[0]});
-                                                } else {
-                                                    callback({message: helper.SUCCESS, user: rows[0]});
-                                                }
+                                                callback({message: helper.SUCCESS, user: rows[0]});
                                             }
                                         });
                                     }
                                 });
-                            });
-                        } else {
-                            const queryString2 = 'INSERT INTO users SET ?;';
-                            connection.query(queryString2, user, function(err, rows) {
-                                if (err) {
-                                    callback({message: helper.FAIL, user: null});
-                                } else {
-                                    const queryString3 = 'SELECT * FROM users WHERE username=?;';
-                                    connection.query(queryString3, user.username, function(err, rows) {
-                                        // console.log(err);
-                                        if (err) {
-                                            callback({message: helper.FAIL, user: null});
-                                        } else {
-                                            callback({message: helper.SUCCESS, user: rows[0]});
-                                        }
-                                    });
-                                }
-                            });
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
         }
     },
 
@@ -105,44 +105,45 @@ module.exports = {
             // If any of the required fields is missing, then return
             if (!query.username || !query.password) {
                 callback({message: helper.MISSING_REQUIRED_FIELDS, user: null});
-            }
-            // Use escape to prevent from SQL Injection
-            const user = {
-                'username':     connection.escape(helper.toLowerCase(query.username)),
-                'password':     connection.escape(query.password)
-            };
-            const queryString1 = 'SELECT COUNT(*) AS COUNT FROM users WHERE username=?;';
-            // console.log(queryString1);
-            connection.query(queryString1, user.username, function(err, rows) {
-                if (err) {
-                    callback({message: helper.FAIL, user: null});
-                } else {
-                    var count = rows[0].COUNT;
-                    if (count != 1) {
-                        // If find dumplicate primary keys in the database, return
-                        callback({message: helper.USER_DOESNT_EXISTS, user: null});
+            } else {
+                // Use escape to prevent from SQL Injection
+                const user = {
+                    'username':     connection.escape(helper.toLowerCase(query.username)),
+                    'password':     connection.escape(query.password)
+                };
+                const queryString1 = 'SELECT COUNT(*) AS COUNT FROM users WHERE username=?;';
+                // console.log(queryString1);
+                connection.query(queryString1, user.username, function(err, rows) {
+                    if (err) {
+                        callback({message: helper.FAIL, user: null});
                     } else {
-                        // console.log(username);
-                        // console.log(password);
-                        const queryString2 = 'SELECT * FROM users WHERE username=?;';
-                        connection.query(queryString2, user.username, function(err, rows) {
-                            // console.log(err);
-                            if (err) {
-                                callback({message: helper.FAIL, user: null});
-                            } else {
-                                var originalPassword = rows[0].password;
-                                console.log(originalPassword);
-                                console.log(user.password);
-                                if (originalPassword != user.password) {
-                                    callback({message: helper.WRONG_PASSWORD, user: null});
+                        var count = rows[0].COUNT;
+                        if (count != 1) {
+                            // If find dumplicate primary keys in the database, return
+                            callback({message: helper.USER_DOESNT_EXISTS, user: null});
+                        } else {
+                            // console.log(username);
+                            // console.log(password);
+                            const queryString2 = 'SELECT * FROM users WHERE username=?;';
+                            connection.query(queryString2, user.username, function(err, rows) {
+                                // console.log(err);
+                                if (err) {
+                                    callback({message: helper.FAIL, user: null});
                                 } else {
-                                    callback({message: helper.SUCCESS, user: rows[0]});
+                                    var originalPassword = rows[0].password;
+                                    console.log(originalPassword);
+                                    console.log(user.password);
+                                    if (originalPassword != user.password) {
+                                        callback({message: helper.WRONG_PASSWORD, user: null});
+                                    } else {
+                                        callback({message: helper.SUCCESS, user: rows[0]});
+                                    }
                                 }
-                            }
-                        });
+                            });
+                        }
                     }
-                }
-            });
+                });
+            }
         }
     },
 

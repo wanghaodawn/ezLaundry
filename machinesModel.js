@@ -15,69 +15,71 @@ module.exports = {
             // If any of the required fields is missing, then return
             if (!query.machine_id || !query.idle_power || !query.running_time_minute || !query.machine_type) {
                 callback(helper.MISSING_REQUIRED_FIELDS);
-            }
-            // Check if the input numbers are in good format
-            if (isNaN(query.machine_id) || isNaN(query.running_time_minute)
-                || (isNaN(query.idle_power) && query.idle_power.toString.indexOf('.' != -1))) {
-                callback(helper.INVALID_NUMBER_FORMAT);
-            }
-            // Use escape to prevent from SQL Injection
-            var machine = {
-                'machine_id':           query.machine_id,
-                'idle_power':           query.idle_power,
-                'running_time_minute':  query.running_time_minute,
-                'machine_type':         connection.escape(helper.toLowerCase(query.machine_type))
-            };
-            // console.log(machine);
-            const queryString1 = 'SELECT COUNT(*) AS COUNT FROM machines WHERE machine_id=?;';
-            connection.query(queryString1, machine.machine_id, function(err, rows) {
-                if (err) {
-                    callback(helper.FAIL);
+            } else {
+                // Check if the input numbers are in good format
+                if (isNaN(query.machine_id) || isNaN(query.running_time_minute)
+                    || (isNaN(query.idle_power) && query.idle_power.toString.indexOf('.' != -1))) {
+                    callback(helper.INVALID_NUMBER_FORMAT);
                 } else {
-                    var count = rows[0].COUNT;
-                    if (count != 0) {
-                        // If find dumplicate primary keys in the database, return
-                        callback(helper.DUPLICATE_PRIMARY_KEY);
-                    } else {
-                        var res_message = '';
-                        if ('address' in query && 'city' in query ) {
-                            // Use escape to prevent from SQL Injection
-                            const address = helper.toLowerCase(query.address);
-                            const city = helper.toLowerCase(query.city);
-
-                            // Get user's desired apartment's latitude and longitude
-                            helper.getLocation(GoogleMapAPIKey, address, city, function(res) {
-                                res_message = res.message;
-                                if (res.message == helper.SUCCESS) {
-                                    machine['latitude'] = res.latitude;
-                                    machine['longitude'] = res.longitude;
-                                }
-                                const queryString2 = 'INSERT INTO machines SET ?;';
-                                connection.query(queryString2, machine, function(err, rows) {
-                                    if (err) {
-                                        // Fail, return
-                                        callback(helper.FAIL);
-                                    } else {
-                                        // Success
-                                        callback(helper.SUCCESS);
-                                    }
-                                });
-                            });
+                    // Use escape to prevent from SQL Injection
+                    var machine = {
+                        'machine_id':           query.machine_id,
+                        'idle_power':           query.idle_power,
+                        'running_time_minute':  query.running_time_minute,
+                        'machine_type':         connection.escape(helper.toLowerCase(query.machine_type))
+                    };
+                    // console.log(machine);
+                    const queryString1 = 'SELECT COUNT(*) AS COUNT FROM machines WHERE machine_id=?;';
+                    connection.query(queryString1, machine.machine_id, function(err, rows) {
+                        if (err) {
+                            callback(helper.FAIL);
                         } else {
-                            const queryString2 = 'INSERT INTO machines SET ?;';
-                            connection.query(queryString2, machine, function(err, rows) {
-                                if (err) {
-                                    // Fail, return
-                                    callback(helper.FAIL);
+                            var count = rows[0].COUNT;
+                            if (count != 0) {
+                                // If find dumplicate primary keys in the database, return
+                                callback(helper.DUPLICATE_PRIMARY_KEY);
+                            } else {
+                                var res_message = '';
+                                if ('address' in query && 'city' in query ) {
+                                    // Use escape to prevent from SQL Injection
+                                    const address = helper.toLowerCase(query.address);
+                                    const city = helper.toLowerCase(query.city);
+
+                                    // Get user's desired apartment's latitude and longitude
+                                    helper.getLocation(GoogleMapAPIKey, address, city, function(res) {
+                                        res_message = res.message;
+                                        if (res.message == helper.SUCCESS) {
+                                            machine['latitude'] = res.latitude;
+                                            machine['longitude'] = res.longitude;
+                                        }
+                                        const queryString2 = 'INSERT INTO machines SET ?;';
+                                        connection.query(queryString2, machine, function(err, rows) {
+                                            if (err) {
+                                                // Fail, return
+                                                callback(helper.FAIL);
+                                            } else {
+                                                // Success
+                                                callback(helper.SUCCESS);
+                                            }
+                                        });
+                                    });
                                 } else {
-                                    // Success
-                                    callback(helper.SUCCESS);
+                                    const queryString2 = 'INSERT INTO machines SET ?;';
+                                    connection.query(queryString2, machine, function(err, rows) {
+                                        if (err) {
+                                            // Fail, return
+                                            callback(helper.FAIL);
+                                        } else {
+                                            // Success
+                                            callback(helper.SUCCESS);
+                                        }
+                                    });
                                 }
-                            });
+                            }
                         }
-                    }
+                    });
                 }
-            });
+            }
         }
     },
 
@@ -98,31 +100,32 @@ module.exports = {
                 // Check if the input numbers are in good format
                 if (isNaN(query.machine_id)) {
                     callback(helper.INVALID_NUMBER_FORMAT);
-                }
-                // Delete one machine
-                const queryString1 = 'SELECT COUNT(*) AS COUNT FROM machines WHERE machine_id=?;';
-                connection.query(queryString1, machine.machine_id, function(err, rows) {
-                    if (err) {
-                        callback(helper.FAIL);
-                    } else {
-                        var count = rows[0].COUNT;
-                        if (count != 1) {
-                            // If cannot find the item,then return
-                            callback(helper.ITEM_DOESNT_EXIST);
+                } else {
+                    // Delete one machine
+                    const queryString1 = 'SELECT COUNT(*) AS COUNT FROM machines WHERE machine_id=?;';
+                    connection.query(queryString1, machine.machine_id, function(err, rows) {
+                        if (err) {
+                            callback(helper.FAIL);
                         } else {
-                            const queryString2 = 'DELETE FROM machines WHERE machine_id=?;';
-                            connection.query(queryString2, machine.machine_id, function(err, rows) {
-                                if (err) {
-                                    // Fail, return
-                                    callback(helper.FAIL);
-                                } else {
-                                    // Success
-                                    callback(helper.SUCCESS);
-                                }
-                            });
+                            var count = rows[0].COUNT;
+                            if (count != 1) {
+                                // If cannot find the item,then return
+                                callback(helper.ITEM_DOESNT_EXIST);
+                            } else {
+                                const queryString2 = 'DELETE FROM machines WHERE machine_id=?;';
+                                connection.query(queryString2, machine.machine_id, function(err, rows) {
+                                    if (err) {
+                                        // Fail, return
+                                        callback(helper.FAIL);
+                                    } else {
+                                        // Success
+                                        callback(helper.SUCCESS);
+                                    }
+                                });
+                            }
                         }
-                    }
-                });
+                    });
+                }
             } else {
                 // If any of the required fields is missing, then return
                 callback(helper.MISSING_REQUIRED_FIELDS);
