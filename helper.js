@@ -1,3 +1,6 @@
+const fs = require('fs');
+var request = require('request');
+
 module.exports = {
     // Message to be sent to browser
     SUCCESS: 'SUCCESS',
@@ -16,6 +19,7 @@ module.exports = {
     MACHINE_IS_WORKING_NOW: 'MACHINE_IS_WORKING_NOW',
     MISSING_FIELDS_OF_USER_ADDRESS: 'MISSING_FIELDS_OF_USER_ADDRESS',
     TWO_PASSWORDS_DOESNT_MATCH: 'TWO_PASSWORDS_DOESNT_MATCH',
+    NO_GOOGLE_MAP_API_KEY_FOUND: 'NO_GOOGLE_MAP_API_KEY_FOUND',
     // If the string is not null, then change it to lowercase
     toLowerCase : function (s) {
         if (s) {
@@ -35,5 +39,33 @@ module.exports = {
             }
         }
         return s;
+    },
+
+    getGooglMapAPIKey : function (callback) {
+        fs.readFile('GOOGLE_MAP_API_KEY.dat', 'utf8', function (err, data) {
+          if (err) {
+                callback(NO_GOOGLE_MAP_API_KEY_FOUND);
+            } else {
+                callback(data);
+            }
+        });
+    },
+
+    getLocation : function (GoogleMapAPIKey, address, zip, city, state, country, callback) {
+        var url = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + address + ', ';
+        url += city + ', ' + state + ', ' + zip;
+        url = url.replace(/ /g, '+');
+        url += '&key=' + GoogleMapAPIKey;
+        console.log(url);
+
+        var req = request.get({url: url, json: true}, function (error, response, body) {
+            if (!error && response.statusCode === 200) {
+                const latitude = body['results'][0]['geometry']['location']['lat'];
+                const longitude = body['results'][0]['geometry']['location']['lng'];
+                callback({message: 'SUCCESS', latitude: latitude, longitude: longitude});
+            } else {
+                callback({message: 'FAIL'});
+            }
+        });
     }
 }

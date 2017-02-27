@@ -7,7 +7,7 @@ const moment = require('moment');
 const helper = require('./helper.js');
 
 module.exports = {
-    createUser : function (connection, query, res, callback) {
+    createUser : function (GoogleMapAPIKey, connection, query, res, callback) {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
             // console.log('null_query');
@@ -15,26 +15,14 @@ module.exports = {
             callback({message: helper.MISSING_REQUIRED_FIELDS, user: null});
         } else {
             // If any of the required fields is missing, then return
-            if (!query.username || !query.password) {
+            if (!query.username || !query.password || !query.property_name) {
                 callback({message: helper.MISSING_REQUIRED_FIELDS, user: null});
             }
-            // Use escape to prevent from SQL Injection
-            const user = {
-                'username':      connection.escape(helper.toLowerCase(query.username)),
-                'firstname':     connection.escape(helper.toLowerCase(query.firstname)),
-                'lastname':      connection.escape(helper.toLowerCase(query.lastname)),
-                'password':      connection.escape(query.password),
-                'apartment_name':connection.escape(helper.toLowerCase(query.apartment_name)),
-                'address':       connection.escape(helper.toLowerCase(query.address)),
-                'zip':           connection.escape(helper.toLowerCase(query.zip)),
-                'city':          connection.escape(helper.toLowerCase(query.city)),
-                'state':         connection.escape(helper.toLowerCase(query.state)),
-                'country':       connection.escape(helper.toLowerCase(query.country))
-            };
+
             // console.log(user);
             const queryString1 = 'SELECT COUNT(*) AS COUNT FROM users WHERE username=?;';
             // console.log(queryString1);
-            connection.query(queryString1, user.username, function(err, rows) {
+            connection.query(queryString1, connection.escape(helper.toLowerCase(query.username)), function(err, rows) {
                 if (err) {
                     callback({message: helper.FAIL, user: null});
                 } else {
@@ -43,22 +31,43 @@ module.exports = {
                         // If find dumplicate primary keys in the database, return
                         callback({message: helper.DUPLICATE_PRIMARY_KEY, user: null});
                     } else {
-                        const queryString2 = 'INSERT INTO users SET ?;';
-                        connection.query(queryString2, user, function(err, rows) {
-                            if (err) {
-                                callback({message: helper.FAIL, user: null});
-                            } else {
-                                const queryString3 = 'SELECT * FROM users WHERE username=?;';
-                                connection.query(queryString3, user.username, function(err, rows) {
-                                    // console.log(err);
+                        var user = {
+                            'username':      connection.escape(helper.toLowerCase(query.username)),
+                            'password':      connection.escape(query.password),
+                            'property_name': connection.escape(helper.toLowerCase(query.property_name)),
+                        };
+                        if ('address' in query && 'zip' in query && 'city' in query && 'state' in query && 'country' in query) {
+                            // Use escape to prevent from SQL Injection
+                            const address = helper.toLowerCase(query.address);
+                            const zip = helper.toLowerCase(query.zip);
+                            const city = helper.toLowerCase(query.city);
+                            const state = helper.toLowerCase(query.state);
+                            const country = helper.toLowerCase(query.country);
+
+                            // Get user's desired apartment's latitude and longitude
+                            helper.getLocation(GoogleMapAPIKey, address, zip, city, state, country, function(res) {
+                                if (res.message == helper.SUCCESS) {
+                                    user['latitude'] = res.latitude;
+                                    user['longitude'] = res.longitude;
+                                }
+                                const queryString2 = 'INSERT INTO users SET ?;';
+                                connection.query(queryString2, user, function(err, rows) {
                                     if (err) {
                                         callback({message: helper.FAIL, user: null});
                                     } else {
-                                        callback({message: helper.SUCCESS, user: rows[0]});
+                                        const queryString3 = 'SELECT * FROM users WHERE username=?;';
+                                        connection.query(queryString3, user.username, function(err, rows) {
+                                            // console.log(err);
+                                            if (err) {
+                                                callback({message: helper.FAIL, user: null});
+                                            } else {
+                                                callback({message: helper.SUCCESS, user: rows[0]});
+                                            }
+                                        });
                                     }
                                 });
-                            }
-                        });
+                            });
+                        }
                     }
                 }
             });

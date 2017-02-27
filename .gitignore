@@ -1,3 +1,4 @@
+*.dat
 node_modules/
 server.log
 *.pem

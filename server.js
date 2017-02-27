@@ -29,6 +29,17 @@ var connection = mysql.createConnection({
 });
 connection.connect();
 
+// Get API Key for Google Map
+var GoogleMapAPIKey = '';
+helper.getGooglMapAPIKey(function (result) {
+    GoogleMapAPIKey = result;
+    if (GoogleMapAPIKey == '') {
+        console.log(helper.NO_GOOGLE_MAP_API_KEY_FOUND);
+    } else {
+        console.log("Found Google MAP API KEY");
+    }
+});
+
 // Configuration
 hbs.registerPartials(__dirname + '/views/partials')
 app.set('view engine', 'hbs');
@@ -204,7 +215,7 @@ app.get('/logout', (req, res) => {
 // RESTful APIs
 // Create a user
 app.post('/api/add_user/', (req, res) => {
-    usersModel.createUser(connection, req.body, res, function(result) {
+    usersModel.createUser(GoogleMapAPIKey, connection, req.body, res, function(result) {
         var output = JSON.stringify(result);
         res.send(output);
     });
