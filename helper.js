@@ -52,10 +52,9 @@ module.exports = {
     getGooglMapAPIKey : function (callback) {
         fs.readFile('GOOGLE_MAP_API_KEY.dat', 'utf8', function (err, data) {
           if (err) {
-                callback(NO_GOOGLE_MAP_API_KEY_FOUND);
-            } else {
-                callback(data);
+                return callback(NO_GOOGLE_MAP_API_KEY_FOUND);
             }
+            return callback(data);
         });
     },
 
@@ -68,14 +67,13 @@ module.exports = {
         var req = request.get({url: url, json: true}, function (error, response, body) {
             if (!error && response.statusCode === 200) {
                 if (body['status'] == 'ZERO_RESULTS') {
-                    callback({message: 'ZERO_RESULTS'});
-                } else {
-                    const latitude = body['results'][0]['geometry']['location']['lat'];
-                    const longitude = body['results'][0]['geometry']['location']['lng'];
-                    callback({message: 'SUCCESS', latitude: latitude, longitude: longitude});
+                    return callback({message: 'ZERO_RESULTS'});
                 }
+                const latitude = body['results'][0]['geometry']['location']['lat'];
+                const longitude = body['results'][0]['geometry']['location']['lng'];
+                return callback({message: 'SUCCESS', latitude: latitude, longitude: longitude});
             } else {
-                callback({message: 'FAIL'});
+                return callback({message: 'FAIL'});
             }
         });
     },
