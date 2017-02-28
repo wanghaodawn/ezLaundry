@@ -392,6 +392,15 @@ app.post('/api/show_user_schedule_anonymous_type/', (req, res) => {
     });
 });
 
+// Quick reservation
+app.post('/api/quick_reservation/', (req, res) => {
+    schedulesModel.quickResercation(connection, req.body, res, function(result) {
+        console.log(result);
+        var output = JSON.stringify(helper.stripJSON(result));
+        res.send(output);
+    });
+});
+
 // Start the server
 app.listen(port);
 console.log(`Starting server at localhost:${port}`);
