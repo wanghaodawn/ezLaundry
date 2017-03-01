@@ -409,7 +409,9 @@ app.post('/api/show_all_user_schedules_type/', (req, res) => {
         schedulesModel.showAllSchedulesUserType(connection, req.body, res, function(result2) {
             var output = {};
             var output2 = helper.stripJSON(result2);
-            var schedules = [];
+            var schedules_all = [];
+
+            // Get return status
             if (output1.message == helper.SUCCESS && output2.message == helper.SUCCESS) {
                 output.message = helper.SUCCESS;
             } else if (output1.message == helper.SUCCESS) {
@@ -419,12 +421,109 @@ app.post('/api/show_all_user_schedules_type/', (req, res) => {
             } else {
                 output.message = output1.message;
             }
+
+            // Get all schedules
             for (var i in output1.schedules) {
-                schedules.push(output1.schedules[i]);
+                schedules_all.push(output1.schedules[i]);
             }
             for (var i in output2.schedules) {
-                schedules.push(output2.schedules[i]);
+                schedules_all.push(output2.schedules[i]);
             }
+
+            output.schedules = schedules_all;
+            res.send(JSON.stringify(output));
+            console.log('\n');
+            console.log(JSON.stringify(output));
+            return;
+        });
+    });
+});
+
+
+// Show all schedules of the user's location and type
+app.post('/api/show_all_user_schedules_type_after_now/', (req, res) => {
+    schedulesAnnonymousModel.showAllSchedulesAnnUserTypeAfterNow(connection, req.body, res, function(result1) {
+        // console.log(result1);
+        var output1 = helper.stripJSON(result1);
+        schedulesModel.showAllSchedulesUserTypeAfterNow(connection, req.body, res, function(result2) {
+            var output = {};
+            var output2 = helper.stripJSON(result2);
+            var schedules = [];
+
+            // Get return status
+            if (output1.message == helper.SUCCESS && output2.message == helper.SUCCESS) {
+                output.message = helper.SUCCESS;
+            } else if (output1.message == helper.SUCCESS) {
+                output.message = output2.message;
+            } else if (output2.message == helper.SUCCESS) {
+                output.message = output1.message;
+            } else {
+                output.message = output1.message;
+            }
+
+            // console.log(JSON.stringify(output1));
+            // console.log(JSON.stringify(output2));
+
+            // Get all schedules and filter all former schedules today
+            const now = moment(new Date()).tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
+
+            var dic = {};
+            for (var i in output1.schedules) {
+                // console.log(now);
+                // console.log(output1.schedules[i].end_time);
+                // console.log(moment(now).isAfter(moment(output1.schedules[i].end_time)))
+                if (moment(now).isAfter(moment(output1.schedules[i].end_time)) && output1.schedules[i].end_time != null) {
+                    output1.schedules[i].end_time = null;
+                    output1.schedules[i].start_time = null;
+                    output1.schedules[i].schedule_id = null;
+                }
+                if (output1.schedules[i].machine_id in dic) {
+                    dic[output1.schedules[i].machine_id].push(output1.schedules[i]);
+                } else {
+                    var list = [];
+                    list.push(output1.schedules[i])
+                    dic[output1.schedules[i].machine_id] = list;
+                }
+            }
+            for (var i in output2.schedules) {
+                // console.log(now);
+                // console.log(output2.schedules[i].end_time);
+                // console.log(moment(now).isAfter(moment(output2.schedules[i].end_time)))
+                if (moment(now).isAfter(moment(output2.schedules[i].end_time)) && output2.schedules[i].end_time != null) {
+                    output2.schedules[i].end_time = null;
+                    output2.schedules[i].start_time = null;
+                    output2.schedules[i].schedule_id = null;
+                }
+                if (output2.schedules[i].machine_id in dic) {
+                    dic[output2.schedules[i].machine_id].push(output2.schedules[i]);
+                } else {
+                    var list = [];
+                    list.push(output2.schedules[i]);
+                    dic[output2.schedules[i].machine_id] = list;
+                }
+            }
+
+            // console.log(JSON.stringify(dic));
+
+            for (key in dic) {
+                var list = dic[key];
+                list.sort(function (a, b) {
+                    if (a.end_time == null && b.end_time != null) {
+                        return 1;
+                    } else if (a.end_time != null && b.end_time != null) {
+                        return -1;
+                    }
+                    if (a.end_time < a.end_time) {
+                        return -1;
+                    } else if (a.end_time == a.end_time) {
+                        return 0;
+                    } else {
+                        return 1;
+                    }
+                });
+                schedules.push(list[0]);
+            }
+
             output.schedules = schedules;
             res.send(JSON.stringify(output));
             console.log('\n');
