@@ -288,7 +288,7 @@ module.exports = {
    },
 
 
-   showAllSchedulesUserType : function (connection, query, res, callback) {
+   showAllSchedulesAnnUserType : function (connection, query, res, callback) {
        // console.log(query);
        if (JSON.stringify(query) == '{}') {
            // console.log('null_query');

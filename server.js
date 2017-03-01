@@ -385,10 +385,52 @@ app.post('/api/show_all_schedule_anonymous/', (req, res) => {
 
 // Show all schedules annonymous of the user's location and type
 app.post('/api/show_user_schedule_anonymous_type/', (req, res) => {
-    schedulesAnnonymousModel.showAllSchedulesUserType(connection, req.body, res, function(result) {
+    schedulesAnnonymousModel.showAllSchedulesAnnUserType(connection, req.body, res, function(result) {
         console.log(result);
         var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
+    });
+});
+
+// Show all schedules of the user's location and type
+app.post('/api/show_user_schedule_type/', (req, res) => {
+    schedulesmousModel.showAllSchedulesUserType(connection, req.body, res, function(result) {
+        console.log(result);
+        var output = JSON.stringify(helper.stripJSON(result));
+        res.send(output);
+    });
+});
+
+// Show all schedules of the user's location and type
+app.post('/api/show_all_user_schedules_type/', (req, res) => {
+    schedulesAnnonymousModel.showAllSchedulesAnnUserType(connection, req.body, res, function(result1) {
+        // console.log(result1);
+        var output1 = helper.stripJSON(result1);
+        schedulesModel.showAllSchedulesUserType(connection, req.body, res, function(result2) {
+            var output = {};
+            var output2 = helper.stripJSON(result2);
+            var schedules = [];
+            if (output1.message == helper.SUCCESS && output2.message == helper.SUCCESS) {
+                output.message = helper.SUCCESS;
+            } else if (output1.message == helper.SUCCESS) {
+                output.message = output2.message;
+            } else if (output2.message == helper.SUCCESS) {
+                output.message = output1.message;
+            } else {
+                output.message = output1.message;
+            }
+            for (var i in output1.schedules) {
+                schedules.push(output1.schedules[i]);
+            }
+            for (var i in output2.schedules) {
+                schedules.push(output2.schedules[i]);
+            }
+            output.schedules = schedules;
+            res.send(JSON.stringify(output));
+            console.log('\n');
+            console.log(JSON.stringify(output));
+            return;
+        });
     });
 });
 

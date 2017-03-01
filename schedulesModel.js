@@ -336,7 +336,7 @@ module.exports = {
                    // Fail, return
                    return callback(helper.FAIL);
                }// Success
-               result = helper.normalizeSchedulesAnn(rows);
+               result = helper.normalizeSchedules(rows);
                return callback(result);
            });
        } else {
@@ -344,6 +344,63 @@ module.exports = {
            return callback(helper.MISSING_REQUIRED_FIELDS);
        }
    },
+
+
+
+   showAllSchedulesUserType : function (connection, query, res, callback) {
+       // console.log(query);
+       if (JSON.stringify(query) == '{}') {
+           // console.log('null_query');
+           return callback({message: helper.MISSING_REQUIRED_FIELDS, schedules: null});
+       }
+       if (!query.username || !query.machine_type) {
+           return callback({message: helper.MISSING_REQUIRED_FIELDS, schedules: null});
+       }
+       const username = connection.escape(helper.toLowerCase(query.username));
+       const machine_type = connection.escape(helper.toLowerCase(query.machine_type));
+
+    //    Get user's latitude and longitude
+       const queryString0 = 'SELECT * FROM users WHERE username=?;';
+       connection.query(queryString0, username, function(err, rows) {
+        //    console.log(err);
+           if (err) {
+               return callback({message: helper.FAIL, schedules: null});
+           }
+           if (rows.length == 0) {
+               return callback({message: helper.USER_DOESNT_EXISTS, schedules: null});
+           }
+           const latitude = rows[0].latitude;
+           const longitude = rows[0].longitude;
+           const now = moment(new Date()).tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
+           console.log(latitude);
+           console.log(longitude);
+           console.log(now);
+           console.log(machine_type);
+
+        //    Get all schedules in this location
+           const queryString1 = 'SELECT s.schedule_id, m.machine_id, s.start_time, s.end_time\
+                                 FROM schedules s RIGHT JOIN machines m ON s.machine_id = m.machine_id \
+                                 WHERE \
+                                    m.latitude = ? AND m.longitude = ? \
+                                    AND m.machine_type = ? \
+                                    AND ( \
+                                        s.start_time IS NULL OR DATE(s.start_time) = DATE(?) OR DATE(s.end_time) = DATE(?) \
+                                    ) \
+                                 ORDER BY s.end_time DESC;';
+           connection.query(queryString1, [latitude, longitude, machine_type, now, now], function(err, rows) {
+            //    console.log(err);
+            //    console.log(rows);
+               if (err) {
+                   return callback({message: helper.FAIL, schedules: null});
+               }
+               result = helper.normalizeSchedules(rows);
+
+               return callback({message: helper.SUCCESS, schedules: result});
+           });
+       });
+   },
+
+
 
    quickResercation : function (connection, query, res, callback) {
        // console.log(query);
