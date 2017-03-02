@@ -11,15 +11,18 @@ module.exports = {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
             // console.log('null_query');
-            return callback(helper.MISSING_REQUIRED_FIELDS);
+            return callback({message: helper.MISSING_REQUIRED_FIELDS});
         }
         // If any of the required fields is missing, then return
-        if (!query.machine_id || !query.username) {
-            return callback(helper.MISSING_REQUIRED_FIELDS);
+        if (!query.machine_id) {
+            return callback({message: helper.MISSING_MACHINE_ID});
+        }
+        if (!query.username) {
+            return callback({message: helper.MISSING_USERNAME});
         }
         // Check if the input numbers are in good format
         if (isNaN(query.machine_id)) {
-            return callback(helper.INVALID_NUMBER_FORMAT);
+            return callback({message: helper.INVALID_NUMBER_FORMAT});
         }
         // Get current time in the timezone of the server
         const start_date = new Date();
@@ -32,30 +35,30 @@ module.exports = {
         connection.query(queryString000, query.machine_id, function(err, rows) {
             if (err) {
                 // Fail, return
-                return callback(helper.FAIL);
+                return callback({message: helper.FAIL});
             }
             var count = rows[0].COUNT;
             if (count == 0) {
                 // No such machines
-                return callback(helper.ITEM_DOESNT_EXIST);
+                return callback({message: helper.ITEM_DOESNT_EXIST});
             }
             const queryString00 = 'SELECT COUNT(*) AS COUNT FROM users WHERE username=?;';
             connection.query(queryString00, username, function(err, rows) {
                 if (err) {
                     // Fail, return
-                    return callback(helper.FAIL);
+                    return callback({message: helper.FAIL});
                 }
                 var count = rows[0].COUNT;
                 if (count == 0) {
                     // No such machines
-                    return callback(helper.USER_DOESNT_EXISTS);
+                    return callback({message: helper.USER_DOESNT_EXISTS});
                 }
                 // Get running_time_minute of the machine
                 const queryString0 = 'SELECT running_time_minute FROM machines WHERE machine_id=?;';
                 connection.query(queryString0, query.machine_id, function(err, rows) {
                     if (err) {
                         // Fail, return
-                        return callback(helper.FAIL);
+                        return callback({message: helper.FAIL});
                     }
                     // Success
                     // console.log(rows[0]);
@@ -85,12 +88,12 @@ module.exports = {
                         schedules.start_time, schedules.end_time], function(err, rows) {
                         if (err) {
                             // console.log(err);
-                            return callback(helper.FAIL);
+                            return callback({message: helper.FAIL});
                         }
                         var count = rows[0].COUNT;
                         if (count != 0) {
                             // The user has reserved other machines at that time
-                            return callback(helper.USER_CAN_ONLY_RESERVE_ONE_MACHINE_AT_THE_SAME_TIME);
+                            return callback({message: helper.USER_CAN_ONLY_RESERVE_ONE_MACHINE_AT_THE_SAME_TIME});
                         }
 
                      //    Check if the machine is reserved by other people at that time
@@ -106,12 +109,12 @@ module.exports = {
                             schedules.start_time, schedules.end_time], function(err, rows) {
                             if (err) {
                                 // console.log(err);
-                                return callback(helper.FAIL);
+                                return callback({message: helper.FAIL});
                             }
                             var count = rows[0].COUNT;
                             if (count != 0) {
                                 // The machine is reserved by other people at that time
-                                return callback(helper.MACHINE_IS_NOT_AVAILABLE_AT_THAT_TIME);
+                                return callback({message: helper.MACHINE_IS_NOT_AVAILABLE_AT_THAT_TIME});
                             }
 
                             const queryString3 = 'SELECT COUNT(*) AS COUNT \
@@ -126,12 +129,12 @@ module.exports = {
                                 schedules.start_time, schedules.end_time], function(err, rows) {
                                 if (err) {
                                     // console.log(err);
-                                    return callback(helper.FAIL);
+                                    return callback({message: helper.FAIL});
                                 }
                                 var count = rows[0].COUNT;
                                 if (count != 0) {
                                     // The machine is reserved by other people at that time
-                                    return callback(helper.MACHINE_IS_NOT_AVAILABLE_AT_THAT_TIME);
+                                    return callback({message: helper.MACHINE_IS_NOT_AVAILABLE_AT_THAT_TIME});
                                 }
                             });
 
@@ -140,10 +143,10 @@ module.exports = {
                             connection.query(queryString4, schedules, function(err, rows) {
                                 if (err) {
                                     // Fail, return
-                                    return callback(helper.FAIL);
+                                    return callback({message: helper.FAIL});
                                 }
                                 // Success
-                                return callback(helper.SUCCESS);
+                                return callback({message: helper.SUCCESS});
                             });
                         });
                     });
@@ -158,16 +161,22 @@ module.exports = {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
             // console.log('null_query');
-            return callback(helper.MISSING_REQUIRED_FIELDS);
+            return callback({message: helper.MISSING_REQUIRED_FIELDS});
         }
         // If any of the required fields is missing, then return
-        if (!query.machine_id || !query.n || !query.username) {
-            return callback(helper.MISSING_REQUIRED_FIELDS);
+        if (!query.machine_id) {
+            return callback({message: helper.MISSING_MACHINE_ID});
+        }
+        if (!query.n) {
+            return callback({message: helper.MISSING_NUM_MACHINES});
+        }
+        if (!query.username) {
+            return callback({message: helper.MISSING_USERNAME});
         }
         // console.log(query);
         // Check if the input numbers are in good format
         if (isNaN(query.machine_id) || isNaN(query.n) || query.n <= 0) {
-            return callback(helper.INVALID_NUMBER_FORMAT);
+            return callback({message: helper.INVALID_NUMBER_FORMAT});
         }
         const username = connection.escape(helper.toLowerCase(query.username));
         // Check whether the machine exists or not
@@ -175,24 +184,24 @@ module.exports = {
         connection.query(queryString1, [username, query.machine_id], function(err, rows) {
             if (err) {
                 // Fail, return
-                return callback(helper.FAIL);
+                return callback({message: helper.FAIL});
             }
             var count = rows[0].COUNT;
             if (count == 0) {
                 // No such machines
-                return callback(helper.ITEM_DOESNT_EXIST);
+                return callback({message: helper.ITEM_DOESNT_EXIST});
             } else if (count < query.n) {
-                return callback(helper.DELETE_TOO_MANY_ITEMS);
+                return callback({message: helper.DELETE_TOO_MANY_ITEMS});
             } else {
                 const queryString2 = 'DELETE FROM schedules WHERE username=? AND machine_id=? ORDER BY start_time ASC LIMIT ' + query.n + ';'
                 connection.query(queryString2, [username, query.machine_id], function(err, rows) {
                     if (err) {
                         // Fail, return
                         // console.log(err);
-                        return callback(helper.FAIL);
+                        return callback({message: helper.FAIL});
                     }
                     // Success
-                    return callback(helper.SUCCESS);
+                    return callback({message: helper.SUCCESS});
                 });
             }
         });
@@ -204,15 +213,21 @@ module.exports = {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
             // console.log('null_query');
-            return callback(helper.MISSING_REQUIRED_FIELDS);
+            return callback({message: helper.MISSING_REQUIRED_FIELDS});
         }
         // If any of the required fields is missing, then return
-        if (!query.machine_id || !query.n || !query.username) {
-            return callback(helper.MISSING_REQUIRED_FIELDS);
+        if (!query.machine_id) {
+            return callback({message: helper.MISSING_MACHINE_ID});
+        }
+        if (!query.n) {
+            return callback({message: helper.MISSING_NUM_MACHINES});
+        }
+        if (!query.username) {
+            return callback({message: helper.MISSING_USERNAME});
         }
         // Check if the input numbers are in good format
         if (isNaN(query.machine_id) || isNaN(query.n) || query.n <= 0) {
-            return callback(helper.INVALID_NUMBER_FORMAT);
+            return callback({message: helper.INVALID_NUMBER_FORMAT});
         }
         const username = connection.escape(helper.toLowerCase(query.username));
         // Check whether the machine exists or not
@@ -220,24 +235,24 @@ module.exports = {
         connection.query(queryString1, [username, query.machine_id], function(err, rows) {
             if (err) {
                 // Fail, return
-                return callback(helper.FAIL);
+                return callback({message: helper.FAIL});
             }
             var count = rows[0].COUNT;
             if (count == 0) {
                 // No such machines
-                return callback(helper.ITEM_DOESNT_EXIST);
+                return callback({message: helper.ITEM_DOESNT_EXIST});
             } else if (count < query.n) {
-                return callback(helper.DELETE_TOO_MANY_ITEMS);
+                return callback({message: helper.DELETE_TOO_MANY_ITEMS});
             } else {
                 const queryString2 = 'DELETE FROM schedules WHERE username=? AND machine_id=? ORDER BY start_time DESC LIMIT ' + query.n + ';'
                 connection.query(queryString2, [username, query.machine_id], function(err, rows) {
                     if (err) {
                         // Fail, return
                         // console.log(err);
-                        return callback(helper.FAIL);
+                        return callback({message: helper.FAIL});
                     }
                     // Success
-                    return callback(helper.SUCCESS);
+                    return callback({message: helper.SUCCESS});
                 });
             }
         });
@@ -249,37 +264,37 @@ module.exports = {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
             // console.log('null_query');
-            return callback(helper.MISSING_REQUIRED_FIELDS);
+            return callback({message: helper.MISSING_REQUIRED_FIELDS});
         }
         // If any of the required fields is missing, then return
         if (!query.machine_id) {
-            return callback(helper.MISSING_REQUIRED_FIELDS);
+            return callback({message: helper.MISSING_REQUIRED_FIELDS});
         }
         // Check if the input numbers are in good format
         if (isNaN(query.machine_id)) {
-            return callback(helper.INVALID_NUMBER_FORMAT);
+            return callback({message: helper.INVALID_NUMBER_FORMAT});
         }
         // Check whether the machine exists or not
         const queryString1 = 'SELECT COUNT(*) AS COUNT FROM schedules WHERE machine_id=?;';
         connection.query(queryString1, query.machine_id, function(err, rows) {
             if (err) {
                 // Fail, return
-                return callback(helper.FAIL);
+                return callback({message: helper.FAIL});
             }
             var count = rows[0].COUNT;
             if (count == 0) {
                 // No such machines
-                return callback(helper.ITEM_DOESNT_EXIST);
+                return callback({message: helper.ITEM_DOESNT_EXIST});
             }
             const queryString2 = 'DELETE FROM schedules WHERE machine_id=?;'
             connection.query(queryString2, query.machine_id, function(err, rows) {
                 if (err) {
                     // Fail, return
                     // console.log(err);
-                    return callback(helper.FAIL);
+                    return callback({message: helper.FAIL});
                 }
                 // Success
-                return callback(helper.SUCCESS);
+                return callback({message: helper.SUCCESS});
             });
         });
     },
@@ -290,7 +305,7 @@ module.exports = {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
             // console.log('null_query');
-            return callback(helper.MISSING_REQUIRED_FIELDS);
+            return callback({message: helper.MISSING_REQUIRED_FIELDS});
         }
         // Use escape to prevent from SQL Injection
         const schedule = {
@@ -303,15 +318,15 @@ module.exports = {
             connection.query(queryString, function(err, rows) {
                 if (err) {
                     // Fail, return
-                    return callback(helper.FAIL);
+                    return callback({message: helper.FAIL});
                 } else {
                     // Success
-                    return callback(helper.SUCCESS);
+                    return callback({message: helper.SUCCESS});
                 }
             });
         } else {
             // If any of the required fields is missing, then return
-            return callback(helper.MISSING_REQUIRED_FIELDS);
+            return callback({message: helper.MISSING_DELETE_ALL});
         }
    },
 
@@ -321,7 +336,7 @@ module.exports = {
        // console.log(query);
        if (JSON.stringify(query) == '{}') {
            // console.log('null_query');
-           return callback(helper.MISSING_REQUIRED_FIELDS);
+           return callback({message: helper.MISSING_REQUIRED_FIELDS, schedules: null});
        }
        // Use escape to prevent from SQL Injection
        const schedule = {
@@ -334,14 +349,14 @@ module.exports = {
            connection.query(queryString, function(err, rows) {
                if (err) {
                    // Fail, return
-                   return callback(helper.FAIL);
+                   return callback({message: helper.FAIL, schedules: null});
                }// Success
                result = helper.normalizeSchedules(rows);
-               return callback(result);
+               return callback({message: helper.SUCCESS, schedules: result});
            });
        } else {
            // If any of the required fields is missing, then return
-           return callback(helper.MISSING_REQUIRED_FIELDS);
+           return callback({message: helper.MISSING_SHOW_ALL, schedules: null});
        }
    },
 
@@ -353,8 +368,11 @@ module.exports = {
            // console.log('null_query');
            return callback({message: helper.MISSING_REQUIRED_FIELDS, schedules: null});
        }
-       if (!query.username || !query.machine_type) {
-           return callback({message: helper.MISSING_REQUIRED_FIELDS, schedules: null});
+       if (!query.username) {
+           return callback({message: helper.MISSING_USERNAME, schedules: null});
+       }
+       if (!query.machine_type) {
+           return callback({message: helper.MISSING_MACHINE_TYPE, schedules: null});
        }
        const username = connection.escape(helper.toLowerCase(query.username));
        const machine_type = connection.escape(helper.toLowerCase(query.machine_type));
@@ -408,8 +426,11 @@ module.exports = {
            // console.log('null_query');
            return callback({message: helper.MISSING_REQUIRED_FIELDS, schedules: null});
        }
-       if (!query.username || !query.machine_type) {
-           return callback({message: helper.MISSING_REQUIRED_FIELDS, schedules: null});
+       if (!query.username) {
+           return callback({message: helper.MISSING_USERNAME, schedules: null});
+       }
+       if (!query.machine_type) {
+           return callback({message: helper.MISSING_MACHINE_TYPE, schedules: null});
        }
        const username = connection.escape(helper.toLowerCase(query.username));
        const machine_type = connection.escape(helper.toLowerCase(query.machine_type));
@@ -460,15 +481,18 @@ module.exports = {
        // console.log(query);
        if (JSON.stringify(query) == '{}') {
            // console.log('null_query');
-           return callback(helper.MISSING_REQUIRED_FIELDS);
+           return callback({message: helper.MISSING_REQUIRED_FIELDS});
        }
        // If any of the required fields is missing, then return
-       if (!query.machine_id || !query.username) {
-           return callback(helper.MISSING_REQUIRED_FIELDS);
+       if (!query.username) {
+           return callback({message: helper.MISSING_USERNAME, schedules: null});
+       }
+       if (!query.machine_id) {
+           return callback({message: helper.MISSING_MACHINE_ID, schedules: null});
        }
        // Check if the input numbers are in good format
        if (isNaN(query.machine_id)) {
-           return callback(helper.INVALID_NUMBER_FORMAT);
+           return callback({message: helper.INVALID_NUMBER_FORMAT});
        }
        // Get current time in the timezone of the server
        const start_date = new Date();
@@ -481,23 +505,23 @@ module.exports = {
        connection.query(queryString000, query.machine_id, function(err, rows) {
            if (err) {
                // Fail, return
-               return callback(helper.FAIL);
+               return callback({message: helper.FAIL});
            }
            var count = rows[0].COUNT;
            if (count == 0) {
                // No such machines
-               return callback(helper.ITEM_DOESNT_EXIST);
+               return callback({message: helper.ITEM_DOESNT_EXIST});
            }
            const queryString00 = 'SELECT COUNT(*) AS COUNT FROM users WHERE username=?;';
            connection.query(queryString00, username, function(err, rows) {
                if (err) {
                    // Fail, return
-                   return callback(helper.FAIL);
+                   return callback({message: helper.FAIL});
                }
                var count = rows[0].COUNT;
                if (count == 0) {
                    // No such machines
-                   return callback(helper.USER_DOESNT_EXISTS);
+                   return callback({message: helper.USER_DOESNT_EXISTS});
                }
                // Get end_time
                const time_gap_minutes = 5;
@@ -525,13 +549,13 @@ module.exports = {
                    schedules.start_time, schedules.end_time], function(err, rows) {
                    if (err) {
                        // console.log(err);
-                       return callback(helper.FAIL);
+                       return callback({message: helper.FAIL});
                    }
-                   var count = rows[0].COUNT;
-                   if (count != 0) {
-                       // The user has reserved other machines at that time
-                       return callback(helper.USER_CAN_ONLY_RESERVE_ONE_MACHINE_AT_THE_SAME_TIME);
-                   }
+                //    var count = rows[0].COUNT;
+                //    if (count != 0) {
+                //        // The user has reserved other machines at that time
+                //        return callback({message: helper.USER_CAN_ONLY_RESERVE_ONE_MACHINE_AT_THE_SAME_TIME});
+                //    }
 
                 //    Check if the machine is reserved by other people at that time
                    const queryString1 = 'SELECT COUNT(*) AS COUNT \
@@ -546,12 +570,12 @@ module.exports = {
                        schedules.start_time, schedules.end_time], function(err, rows) {
                        if (err) {
                            // console.log(err);
-                           return callback(helper.FAIL);
+                           return callback({message: helper.FAIL});
                        }
                        var count = rows[0].COUNT;
                        if (count != 0) {
                            // The machine is reserved by other people at that time
-                           return callback(helper.MACHINE_IS_NOT_AVAILABLE_AT_THAT_TIME);
+                           return callback({message: helper.MACHINE_IS_NOT_AVAILABLE_AT_THAT_TIME});
                        }
 
                        const queryString2 = 'SELECT COUNT(*) AS COUNT \
@@ -566,12 +590,12 @@ module.exports = {
                            schedules.start_time, schedules.end_time], function(err, rows) {
                            if (err) {
                                // console.log(err);
-                               return callback(helper.FAIL);
+                               return callback({message: helper.FAIL});
                            }
                            var count = rows[0].COUNT;
                            if (count != 0) {
                                // The machine is reserved by other people at that time
-                               return callback(helper.MACHINE_IS_NOT_AVAILABLE_AT_THAT_TIME);
+                               return callback({message: helper.MACHINE_IS_NOT_AVAILABLE_AT_THAT_TIME});
                            }
                        });
 
@@ -580,10 +604,10 @@ module.exports = {
                        connection.query(queryString3, schedules, function(err, rows) {
                            if (err) {
                                // Fail, return
-                               return callback(helper.FAIL);
+                               return callback({message: helper.FAIL});
                            }
                            // Success
-                           return callback(helper.SUCCESS);
+                           return callback({message: helper.SUCCESS});
                        });
                    });
                });

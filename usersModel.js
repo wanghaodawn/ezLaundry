@@ -15,9 +15,16 @@ module.exports = {
             return callback({message: helper.MISSING_REQUIRED_FIELDS, user: null});
         }
         // If any of the required fields is missing, then return
-        if (!query.username || !query.password || !query.property_name) {
-            return callback({message: helper.MISSING_REQUIRED_FIELDS, user: null});
+        if (!query.username) {
+            return callback({message: helper.MISSING_USERNAME, user: null});
         }
+        if (!query.password) {
+            return callback({message: helper.MISSING_PASSWORD, user: null});
+        }
+        if (!query.property_name) {
+            return callback({message: helper.MISSING_PROPERTY_NAME, user: null});
+        }
+
         // console.log(user);
         const queryString1 = 'SELECT COUNT(*) AS COUNT FROM users WHERE username=?;';
         // console.log(queryString1);
@@ -43,8 +50,12 @@ module.exports = {
 
                 // Get user's desired apartment's latitude and longitude
                 helper.getLocation(GoogleMapAPIKey, address, city, function(res) {
+                    console.log(JSON.stringify(res));
                     res_message = res.message;
-                    if (res.message == helper.SUCCESS) {
+                    // console.log(res_message);
+                    // console.log(helper.SUCCESS);
+                    // console.log(res_message == helper.SUCCESS);
+                    if (res_message == helper.SUCCESS) {
                         user['latitude'] = res.latitude;
                         user['longitude'] = res.longitude;
                     }
@@ -96,8 +107,11 @@ module.exports = {
             return callback({message: helper.MISSING_REQUIRED_FIELDS, user: null});
         }
         // If any of the required fields is missing, then return
-        if (!query.username || !query.password) {
-            return callback({message: helper.MISSING_REQUIRED_FIELDS, user: null});
+        if (!query.username) {
+            return callback({message: helper.MISSING_USERNAME, user: null});
+        }
+        if (!query.password) {
+            return callback({message: helper.MISSING_PASSWORD, user: null});
         }
         // Use escape to prevent from SQL Injection
         const user = {
@@ -139,7 +153,7 @@ module.exports = {
     deleteOneUser : function(connection, query, res, callback) {
         console.log(query);
         if (JSON.stringify(query) == '{}') {
-            return callback(helper.MISSING_REQUIRED_FIELDS);
+            return callback({message: helper.MISSING_REQUIRED_FIELDS});
         }
         // Use escape to prevent from SQL Injection
         const user = {
@@ -151,26 +165,26 @@ module.exports = {
             const queryString1 = 'SELECT COUNT(*) AS COUNT FROM users WHERE username=?;';
             connection.query(queryString1, user.username, function(err, rows) {
                 if (err) {
-                    return callback(helper.FAIL);
+                    return callback({message: helper.FAIL});
                 }
                 var count = rows[0].COUNT;
                 if (count != 1) {
                     // If cannot find the item,then return
-                    return callback(helper.ITEM_DOESNT_EXIST);
+                    return callback({message: helper.ITEM_DOESNT_EXIST});
                 }
                 const queryString2 = 'DELETE FROM users WHERE username=?;';
                 connection.query(queryString2, user.username, function(err, rows) {
                     if (err) {
                         // Fail, return
-                        return callback(helper.FAIL);
+                        return callback({message: helper.FAIL});
                     }
                     // Success
-                    return callback(helper.SUCCESS);
+                    return callback({message: helper.SUCCESS});
                 });
             });
         } else {
             // If any of the required fields is missing, then return
-            return callback(helper.MISSING_REQUIRED_FIELDS);
+            return callback({message: helper.MISSING_USERNAME});
         }
     },
 
@@ -179,11 +193,11 @@ module.exports = {
     deleteAllUsers : function(connection, query, res, callback) {
         console.log(query);
         if (JSON.stringify(query) == '{}') {
-            return callback(helper.MISSING_REQUIRED_FIELDS);
+            return callback({message: helper.MISSING_REQUIRED_FIELDS});
         }
         // Use escape to prevent from SQL Injection
         const user = {
-            'delete_all':   connection.escape(helper.toLowerCase(query.delete_all))
+            'delete_all': connection.escape(helper.toLowerCase(query.delete_all))
         };
         // console.log(user);
         if (query.delete_all && query.delete_all.toLowerCase() == 'true') {
@@ -192,14 +206,14 @@ module.exports = {
             connection.query(queryString, function(err, rows) {
                 if (err) {
                     // Fail, return
-                    return callback(helper.FAIL);
+                    return callback({message: helper.FAIL});
                 }
                 // Success
-                return callback(helper.SUCCESS);
+                return callback({message: helper.SUCCESS});
             });
         } else {
             // If any of the required fields is missing, then return
-            return callback(helper.MISSING_REQUIRED_FIELDS);
+            return callback({message: helper.MISSING_DELETE_ALL});
         }
     },
 
@@ -210,7 +224,7 @@ module.exports = {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
             // console.log('null_query');
-            return callback(helper.MISSING_REQUIRED_FIELDS);
+            return callback({message: helper.MISSING_REQUIRED_FIELDS, user: null});
         }
         // Use escape to prevent from SQL Injection
         const schedule = {
@@ -223,15 +237,15 @@ module.exports = {
             connection.query(queryString, function(err, rows) {
                 if (err) {
                     // Fail, return
-                    return callback(helper.FAIL);
+                    return callback({message: helper.FAIL, user: null});
                 }
                 // Success
                 result = helper.normalizeUsers(rows);
-                return callback(result);
+                return callback({message: helper.SUCCESS, user: result});
             });
         } else {
             // If any of the required fields is missing, then return
-            return callback(helper.MISSING_REQUIRED_FIELDS);
+            return callback({message: helper.MISSING_SHOW_ALL, user: null});
         }
     },
 

@@ -10,16 +10,16 @@ module.exports = {
     createMachine : function (GoogleMapAPIKey, connection, query, res, callback) {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
-            return callback(helper.MISSING_REQUIRED_FIELDS);
+            return callback({message: helper.MISSING_REQUIRED_FIELDS});
         }
         // If any of the required fields is missing, then return
         if (!query.machine_id || !query.idle_power || !query.running_time_minute || !query.machine_type) {
-            return callback(helper.MISSING_REQUIRED_FIELDS);
+            return callback({message: helper.MISSING_REQUIRED_FIELDS});
         }
         // Check if the input numbers are in good format
         if (isNaN(query.machine_id) || isNaN(query.running_time_minute)
             || (isNaN(query.idle_power) && query.idle_power.toString.indexOf('.' != -1))) {
-            return callback(helper.INVALID_NUMBER_FORMAT);
+            return callback({message: helper.INVALID_NUMBER_FORMAT});
         }
         // Use escape to prevent from SQL Injection
         var machine = {
@@ -32,12 +32,12 @@ module.exports = {
         const queryString1 = 'SELECT COUNT(*) AS COUNT FROM machines WHERE machine_id=?;';
         connection.query(queryString1, machine.machine_id, function(err, rows) {
             if (err) {
-                return callback(helper.FAIL);
+                return callback({message: helper.FAIL});
             }
             var count = rows[0].COUNT;
             if (count != 0) {
                 // If find dumplicate primary keys in the database, return
-                return callback(helper.DUPLICATE_PRIMARY_KEY);
+                return callback({message: helper.DUPLICATE_PRIMARY_KEY});
             }
             var res_message = '';
             if ('address' in query && 'city' in query ) {
@@ -56,10 +56,10 @@ module.exports = {
                     connection.query(queryString2, machine, function(err, rows) {
                         if (err) {
                             // Fail, return
-                            return callback(helper.FAIL);
+                            return callback({message: helper.FAIL});
                         }
                         // Success
-                        return callback(helper.SUCCESS);
+                        return callback({message: helper.SUCCESS});
                     });
                 });
             } else {
@@ -67,10 +67,10 @@ module.exports = {
                 connection.query(queryString2, machine, function(err, rows) {
                     if (err) {
                         // Fail, return
-                        return callback(helper.FAIL);
+                        return callback({message: helper.FAIL});
                     }
                     // Success
-                    return callback(helper.SUCCESS);
+                    return callback({message: helper.SUCCESS});
                 });
             }
         });
@@ -82,7 +82,7 @@ module.exports = {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
             // console.log('null_query');
-            return callback(helper.MISSING_REQUIRED_FIELDS);
+            return callback({message: helper.MISSING_REQUIRED_FIELDS});
         }
         // Use escape to prevent from SQL Injection
         const machine = {
@@ -92,32 +92,32 @@ module.exports = {
         if (query.machine_id) {
             // Check if the input numbers are in good format
             if (isNaN(query.machine_id)) {
-                return callback(helper.INVALID_NUMBER_FORMAT);
+                return callback({message: helper.INVALID_NUMBER_FORMAT});
             }
             // Delete one machine
             const queryString1 = 'SELECT COUNT(*) AS COUNT FROM machines WHERE machine_id=?;';
             connection.query(queryString1, machine.machine_id, function(err, rows) {
                 if (err) {
-                    return callback(helper.FAIL);
+                    return callback({message: helper.FAIL});
                 }
                 var count = rows[0].COUNT;
                 if (count != 1) {
                     // If cannot find the item,then return
-                    return callback(helper.ITEM_DOESNT_EXIST);
+                    return callback({message: helper.ITEM_DOESNT_EXIST});
                 }
                 const queryString2 = 'DELETE FROM machines WHERE machine_id=?;';
                 connection.query(queryString2, machine.machine_id, function(err, rows) {
                     if (err) {
                         // Fail, return
-                        return callback(helper.FAIL);
+                        return callback({message: helper.FAIL});
                     }
                     // Success
-                    return callback(helper.SUCCESS);
+                    return callback({message: helper.SUCCESS});
                 });
             });
         } else {
             // If any of the required fields is missing, then return
-            return callback(helper.MISSING_REQUIRED_FIELDS);
+            return callback({message: helper.MISSING_REQUIRED_FIELDS});
         }
     },
 
@@ -126,7 +126,7 @@ module.exports = {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
             // console.log('null_query');
-            return callback(helper.MISSING_REQUIRED_FIELDS);
+            return callback({message: helper.MISSING_REQUIRED_FIELDS});
         }
         // Use escape to prevent from SQL Injection
         const machine = {
@@ -139,14 +139,14 @@ module.exports = {
             connection.query(queryString, function(err, rows) {
                 if (err) {
                     // Fail, return
-                    return callback(helper.FAIL);
+                    return callback({message: helper.FAIL});
                 }
                 // Success
-                return callback(helper.SUCCESS);
+                return callback({message: helper.SUCCESS});
             });
         } else {
             // If any of the required fields is missing, then return
-            return callback(helper.MISSING_REQUIRED_FIELDS);
+            return callback({message: helper.MISSING_DELETE_ALL});
         }
     },
 
@@ -157,7 +157,7 @@ module.exports = {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
             // console.log('null_query');
-            return callback(helper.MISSING_REQUIRED_FIELDS);
+            return callback({message: helper.MISSING_REQUIRED_FIELDS, machine: null});
         }
         // Use escape to prevent from SQL Injection
         const schedule = {
@@ -170,15 +170,15 @@ module.exports = {
             connection.query(queryString, function(err, rows) {
                 if (err) {
                     // Fail, return
-                    return callback(helper.FAIL);
+                    return callback({message: helper.FAIL, machine: null});
                 }
                 // Success
                 result = helper.normalizeMachines(rows);
-                return callback(result);
+                return callback({message: helper.SUCCESS, machine: result});
             });
         } else {
             // If any of the required fields is missing, then return
-            return callback(helper.MISSING_REQUIRED_FIELDS);
+            return callback({message: helper.MISSING_SHOW_ALL, machine: null});
         }
     }
 };

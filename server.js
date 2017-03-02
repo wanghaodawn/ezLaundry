@@ -526,8 +526,8 @@ app.post('/api/show_all_user_schedules_type_after_now/', (req, res) => {
 
             output.schedules = schedules;
             res.send(JSON.stringify(output));
-            console.log('\n');
-            console.log(JSON.stringify(output));
+            // console.log('\n');
+            // console.log(JSON.stringify(output));
             return;
         });
     });

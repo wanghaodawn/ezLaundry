@@ -3,27 +3,36 @@ var request = require('request');
 
 module.exports = {
     // Message to be sent to browser
-    SUCCESS: 'SUCCESS',
-    FAIL: 'FAIL',
-    DUPLICATE_PRIMARY_KEY: 'DUPLICATE_PRIMARY_KEY',
-    MISSING_REQUIRED_FIELDS: 'MISSING_REQUIRED_FIELDS',
-    ITEM_DOESNT_EXIST: 'ITEM_DOESNT_EXIST',
-    INCORRECT_QUERY: 'INCORRECT_QUERY',
-    INVALID_NUMBER_FORMAT: 'INVALID_NUMBER_FORMAT',
-    SCHEDULE_CONFLITS: 'SCHEDULE_CONFLITS',
-    DELETE_TOO_MANY_ITEMS: 'DELETE_TOO_MANY_ITEMS',
-    USER_DOESNT_EXISTS: 'USER_DOESNT_EXISTS',
-    WRONG_PASSWORD: 'WRONG_PASSWORD',
-    USERNAME_HAS_BEEN_TAKEN: 'USERNAME_HAS_BEEN_TAKEN',
-    MACHINE_IS_SLEEPING_NOW: 'MACHINE_IS_SLEEPING_NOW',
-    MACHINE_IS_WORKING_NOW: 'MACHINE_IS_WORKING_NOW',
-    MISSING_FIELDS_OF_USER_ADDRESS: 'MISSING_FIELDS_OF_USER_ADDRESS',
-    TWO_PASSWORDS_DOESNT_MATCH: 'TWO_PASSWORDS_DOESNT_MATCH',
-    NO_GOOGLE_MAP_API_KEY_FOUND: 'NO_GOOGLE_MAP_API_KEY_FOUND',
-    ZERO_RESULTS: 'ZERO_RESULTS',
-    MACHINE_DOESNT_EXIST: 'MACHINE_DOESNT_EXIST',
-    USER_CAN_ONLY_RESERVE_ONE_MACHINE_AT_THE_SAME_TIME: 'USER_CAN_ONLY_RESERVE_ONE_MACHINE_AT_THE_SAME_TIME',
-    MACHINE_IS_NOT_AVAILABLE_AT_THAT_TIME: 'MACHINE_IS_NOT_AVAILABLE_AT_THAT_TIME',
+    SUCCESS: 'Success',
+    FAIL: 'Database Failure',
+    MISSING_USERNAME: 'Please enter your username',
+    MISSING_PASSWORD: 'Please enter your password',
+    MISSING_PROPERTY_NAME: 'Please enter the proptery name',
+    MISSING_MACHINE_ID: 'Please enter machine_id',
+    MISSING_CURR_POWER: 'Please enter the current power of the machine',
+    DUPLICATE_PRIMARY_KEY: 'Duplicate Primary Key',
+    MISSING_DELETE_ALL: 'Please enter delete_all in parameters',
+    MISSING_SHOW_ALL: 'Please enter show_all in parameters',
+    MISSING_REQUIRED_FIELDS: 'Missing required fields',
+    MISSING_NUM_MACHINES: 'Missing number of machines',
+    MISSING_MACHINE_TYPE: 'Missing machine type',
+    ITEM_DOESNT_EXIST: 'The requested item doesn\'t exist',
+    INCORRECT_QUERY: 'Please enter the correct query',
+    INVALID_NUMBER_FORMAT: 'Please enter the correct number format',
+    SCHEDULE_CONFLITS: 'The schedule has just been created',
+    DELETE_TOO_MANY_ITEMS: 'You cannot enter the number more than current number of items',
+    USER_DOESNT_EXISTS: 'This user doesn\'t exist',
+    WRONG_PASSWORD: 'The password is wrong',
+    USERNAME_HAS_BEEN_TAKEN: 'This username has already been taken',
+    MACHINE_IS_SLEEPING_NOW: 'The machine is sleeping now',
+    MACHINE_IS_WORKING_NOW: 'The machine begins to work now',
+    MISSING_FIELDS_OF_USER_ADDRESS: 'Please enter the user\'s address',
+    TWO_PASSWORDS_DOESNT_MATCH: 'Two passwords doesn\'t mactch',
+    NO_GOOGLE_MAP_API_KEY_FOUND: 'Cannot find the API Key of Google Map',
+    ZERO_RESULTS: 'Zero results returned',
+    MACHINE_DOESNT_EXIST: 'This machine doesn\'t exist',
+    USER_CAN_ONLY_RESERVE_ONE_MACHINE_AT_THE_SAME_TIME: 'Every user can only reserve one machine at the same time',
+    MACHINE_IS_NOT_AVAILABLE_AT_THAT_TIME: 'The selected machine is not available at that time',
     // If the string is not null, then change it to lowercase
     toLowerCase : function (s) {
         if (s) {
@@ -54,7 +63,7 @@ module.exports = {
     getGooglMapAPIKey : function (callback) {
         fs.readFile('GOOGLE_MAP_API_KEY.dat', 'utf8', function (err, data) {
           if (err) {
-                return callback(NO_GOOGLE_MAP_API_KEY_FOUND);
+                return callback('Cannot find the API Key of Google Map');
             }
             return callback(data);
         });
@@ -68,14 +77,15 @@ module.exports = {
 
         var req = request.get({url: url, json: true}, function (error, response, body) {
             if (!error && response.statusCode === 200) {
-                if (body['status'] == 'ZERO_RESULTS') {
-                    return callback({message: 'ZERO_RESULTS'});
+                if (body['status'] == 'Zero results returned') {
+                    return callback({message: helper.ZERO_RESULTS, latitude: null, longitude: null});
                 }
+                // console.log(body['results'][0]['geometry']['location']);
                 const latitude = body['results'][0]['geometry']['location']['lat'];
                 const longitude = body['results'][0]['geometry']['location']['lng'];
-                return callback({message: 'SUCCESS', latitude: latitude, longitude: longitude});
+                return callback({message: 'Success', latitude: latitude, longitude: longitude});
             } else {
-                return callback({message: 'FAIL'});
+                return callback({message: 'Database Failure', latitude: null, longitude: null});
             }
         });
     },
