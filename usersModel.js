@@ -35,7 +35,7 @@ module.exports = {
             var count = rows[0].COUNT;
             if (count != 0) {
                 // If find dumplicate primary keys in the database, return
-                return callback({message: helper.DUPLICATE_PRIMARY_KEY, user: null});
+                return callback({message: helper.USERNAME_HAS_BEEN_TAKEN, user: null});
             }
             var user = {
                 'username':      connection.escape(helper.toLowerCase(query.username)),
@@ -50,7 +50,7 @@ module.exports = {
 
                 // Get user's desired apartment's latitude and longitude
                 helper.getLocation(GoogleMapAPIKey, address, city, function(res) {
-                    console.log(JSON.stringify(res));
+                    // console.log(JSON.stringify(res));
                     res_message = res.message;
                     // console.log(res_message);
                     // console.log(helper.SUCCESS);

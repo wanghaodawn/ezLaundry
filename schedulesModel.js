@@ -448,10 +448,10 @@ module.exports = {
            const latitude = rows[0].latitude;
            const longitude = rows[0].longitude;
            const now = moment(new Date()).tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
-           console.log(latitude);
-           console.log(longitude);
-           console.log(now);
-           console.log(machine_type);
+        //    console.log(latitude);
+        //    console.log(longitude);
+        //    console.log(now);
+        //    console.log(machine_type);
 
         //    Get all schedules in this location
            const queryString1 = 'SELECT s.schedule_id, m.machine_id, s.start_time, s.end_time \

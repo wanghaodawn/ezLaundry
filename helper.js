@@ -33,6 +33,7 @@ module.exports = {
     MACHINE_DOESNT_EXIST: 'This machine doesn\'t exist',
     USER_CAN_ONLY_RESERVE_ONE_MACHINE_AT_THE_SAME_TIME: 'Every user can only reserve one machine at the same time',
     MACHINE_IS_NOT_AVAILABLE_AT_THAT_TIME: 'The selected machine is not available at that time',
+    NO_MACHINE_THIS_ADDRESS: 'No machines are registered at this address',
     // If the string is not null, then change it to lowercase
     toLowerCase : function (s) {
         if (s) {

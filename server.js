@@ -77,7 +77,7 @@ app.use(bodyParser.json());
 // Dashboard
 app.get('/', (req, res) => {
     const user = req.session.user;
-    console.log(JSON.stringify(req.session.user));
+    // console.log(JSON.stringify(req.session.user));
     if (!user) {
         res.redirect('/login');
     } else {
@@ -115,7 +115,7 @@ app.post('/login', (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
     usersModel.login(connection, username, password, function(result) {
-        console.log(result);
+        // console.log(result);
         if (!result.user) {
             res.render('login.hbs', {
                 message: result.message
@@ -130,7 +130,7 @@ app.post('/login', (req, res) => {
 // Register page
 app.get('/register', (req, res) => {
     const user = req.session.user;
-    console.log(JSON.stringify(req.session.user));
+    // console.log(JSON.stringify(req.session.user));
     if (!user) {
         res.render('register.hbs', {});
     } else {
@@ -152,7 +152,7 @@ app.post('/register', (req, res) => {
         country:    req.body.country,
     };
     usersModel.register(connection, inputUser, function(result) {
-        console.log(result);
+        // console.log(result);
         if (!result.user) {
             res.render('register.hbs', {
                 message: result.message
@@ -167,7 +167,7 @@ app.post('/register', (req, res) => {
 // Change address
 app.get('/change_info', (req, res) => {
     const user = req.session.user;
-    console.log(JSON.stringify(req.session.user));
+    // console.log(JSON.stringify(req.session.user));
     if (!user) {
         res.render('login.hbs', {});
     } else {
@@ -192,7 +192,7 @@ app.post('/change_info', (req, res) => {
         country:            req.body.country,
     };
     usersModel.changeInfo(connection, inputUser, req.session.user, function(result) {
-        console.log(result);
+        // console.log(result);
         if (result.message != helper.SUCCESS) {
             res.render('changeInfo.hbs', {
                 message: result.message,
@@ -225,7 +225,7 @@ app.post('/api/add_user/', (req, res) => {
 app.post('/api/login_user/', (req, res) => {
     usersModel.loginUser(connection, req.body, res, function(result) {
         var output = JSON.stringify(helper.stripJSON(result));
-        console.log(output);
+        // console.log(output);
         res.send(output);
     });
 });
@@ -386,7 +386,7 @@ app.post('/api/show_all_schedule_anonymous/', (req, res) => {
 // Show all schedules annonymous of the user's location and type
 app.post('/api/show_user_schedule_anonymous_type/', (req, res) => {
     schedulesAnnonymousModel.showAllSchedulesAnnUserType(connection, req.body, res, function(result) {
-        console.log(result);
+        // console.log(result);
         var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });
@@ -395,7 +395,7 @@ app.post('/api/show_user_schedule_anonymous_type/', (req, res) => {
 // Show all schedules of the user's location and type
 app.post('/api/show_user_schedule_type/', (req, res) => {
     schedulesmousModel.showAllSchedulesUserType(connection, req.body, res, function(result) {
-        console.log(result);
+        // console.log(result);
         var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });
@@ -432,8 +432,8 @@ app.post('/api/show_all_user_schedules_type/', (req, res) => {
 
             output.schedules = schedules_all;
             res.send(JSON.stringify(output));
-            console.log('\n');
-            console.log(JSON.stringify(output));
+            // console.log('\n');
+            // console.log(JSON.stringify(output));
             return;
         });
     });
@@ -504,7 +504,7 @@ app.post('/api/show_all_user_schedules_type_after_now/', (req, res) => {
             }
 
             // console.log(JSON.stringify(dic));
-
+            var display_id = 1;
             for (key in dic) {
                 var list = dic[key];
                 list.sort(function (a, b) {
@@ -521,10 +521,17 @@ app.post('/api/show_all_user_schedules_type_after_now/', (req, res) => {
                         return 1;
                     }
                 });
+                list[0].display_id = display_id;
+                display_id += 1;
                 schedules.push(list[0]);
             }
 
+
             output.schedules = schedules;
+            if (schedules.length == 0) {
+                output.message = helper.NO_MACHINE_THIS_ADDRESS;
+            }
+
             res.send(JSON.stringify(output));
             // console.log('\n');
             // console.log(JSON.stringify(output));
@@ -536,7 +543,7 @@ app.post('/api/show_all_user_schedules_type_after_now/', (req, res) => {
 // Quick reservation
 app.post('/api/quick_reservation/', (req, res) => {
     schedulesModel.quickResercation(connection, req.body, res, function(result) {
-        console.log(result);
+        // console.log(result);
         var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });
