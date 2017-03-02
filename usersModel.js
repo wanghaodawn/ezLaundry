@@ -59,21 +59,40 @@ module.exports = {
                         user['latitude'] = res.latitude;
                         user['longitude'] = res.longitude;
                     }
-                    const queryString2 = 'INSERT INTO users SET ?;';
-                    connection.query(queryString2, user, function(err, rows) {
+
+                    // If the address is incorrect
+                    if (res.message == helper.INVALID_ADDRESS) {
+                        return callback({message: helper.INVALID_ADDRESS, user: null});
+                    }
+
+                    // Whether the user's addres has machine or not
+                    const queryString10 = 'SELECT COUNT(*) AS COUNT FROM machines WHERE latitude = ? AND longitude = ?;';
+                    connection.query(queryString10, [user['latitude'], user['longitude']], function(err, rows) {
                         if (err) {
                             return callback({message: helper.FAIL, user: null});
                         }
-                        const queryString3 = 'SELECT * FROM users WHERE username=?;';
-                        connection.query(queryString3, user.username, function(err, rows) {
-                            // console.log(err);
+
+                        var count = rows[0].COUNT;
+                        if (count == 0) {
+                            return callback({message: helper.NO_MACHINE_THIS_ADDRESS, user: null});
+                        }
+
+                        const queryString2 = 'INSERT INTO users SET ?;';
+                        connection.query(queryString2, user, function(err, rows) {
                             if (err) {
                                 return callback({message: helper.FAIL, user: null});
                             }
-                            if (res_message == helper.ZERO_RESULTS) {
-                                return callback({message: helper.ZERO_RESULTS, user: rows[0]});
-                            }
-                            return callback({message: helper.SUCCESS, user: rows[0]});
+                            const queryString3 = 'SELECT * FROM users WHERE username=?;';
+                            connection.query(queryString3, user.username, function(err, rows) {
+                                // console.log(err);
+                                if (err) {
+                                    return callback({message: helper.FAIL, user: null});
+                                }
+                                if (res_message == helper.ZERO_RESULTS) {
+                                    return callback({message: helper.ZERO_RESULTS, user: rows[0]});
+                                }
+                                return callback({message: helper.SUCCESS, user: rows[0]});
+                            });
                         });
                     });
                 });
@@ -138,8 +157,8 @@ module.exports = {
                     return callback({message: helper.FAIL, user: null});
                 }
                 var originalPassword = rows[0].password;
-                console.log(originalPassword);
-                console.log(user.password);
+                // console.log(originalPassword);
+                // console.log(user.password);
                 if (originalPassword != user.password) {
                     return callback({message: helper.WRONG_PASSWORD, user: null});
                 }
@@ -151,7 +170,7 @@ module.exports = {
 
 
     deleteOneUser : function(connection, query, res, callback) {
-        console.log(query);
+        // console.log(query);
         if (JSON.stringify(query) == '{}') {
             return callback({message: helper.MISSING_REQUIRED_FIELDS});
         }
@@ -191,7 +210,7 @@ module.exports = {
 
 
     deleteAllUsers : function(connection, query, res, callback) {
-        console.log(query);
+        // console.log(query);
         if (JSON.stringify(query) == '{}') {
             return callback({message: helper.MISSING_REQUIRED_FIELDS});
         }
@@ -334,12 +353,12 @@ module.exports = {
         const newPassword = connection.escape(inputUser.newPassword);
         const confirmPassword = connection.escape(inputUser.confirmPassword);
         const username = connection.escape(originalUser.username);
-        console.log(username);
+        // console.log(username);
         if (newPassword != confirmPassword) {
             return callback({message: helper.TWO_PASSWORDS_DOESNT_MATCH, user: originalUser});
         }
         this.login(connection, originalUser.username, inputUser.password, function(result) {
-            console.log(result);
+            // console.log(result);
             if (result.message != helper.SUCCESS) {
                 return callback({message: helper.WRONG_PASSWORD, user: originalUser});
             }

@@ -52,6 +52,12 @@ module.exports = {
                         machine['latitude'] = res.latitude;
                         machine['longitude'] = res.longitude;
                     }
+
+                    // If the address is incorrect
+                    if (res.message == helper.INVALID_ADDRESS) {
+                        return callback({message: helper.INVALID_ADDRESS});
+                    }
+
                     const queryString2 = 'INSERT INTO machines SET ?;';
                     connection.query(queryString2, machine, function(err, rows) {
                         if (err) {

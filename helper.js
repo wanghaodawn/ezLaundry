@@ -34,6 +34,7 @@ module.exports = {
     USER_CAN_ONLY_RESERVE_ONE_MACHINE_AT_THE_SAME_TIME: 'Every user can only reserve one machine at the same time',
     MACHINE_IS_NOT_AVAILABLE_AT_THAT_TIME: 'The selected machine is not available at that time',
     NO_MACHINE_THIS_ADDRESS: 'No machines are registered at this address',
+    INVALID_ADDRESS: 'Please enter a valid address',
     // If the string is not null, then change it to lowercase
     toLowerCase : function (s) {
         if (s) {
@@ -78,8 +79,9 @@ module.exports = {
 
         var req = request.get({url: url, json: true}, function (error, response, body) {
             if (!error && response.statusCode === 200) {
-                if (body['status'] == 'Zero results returned') {
-                    return callback({message: helper.ZERO_RESULTS, latitude: null, longitude: null});
+                // console.log(body['status']);
+                if (body['status'] == 'ZERO_RESULTS') {
+                    return callback({message: 'Please enter a valid address', latitude: null, longitude: null});
                 }
                 // console.log(body['results'][0]['geometry']['location']);
                 const latitude = body['results'][0]['geometry']['location']['lat'];

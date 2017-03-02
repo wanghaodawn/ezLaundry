@@ -493,6 +493,7 @@ app.post('/api/show_all_user_schedules_type_after_now/', (req, res) => {
                     output2.schedules[i].end_time = null;
                     output2.schedules[i].start_time = null;
                     output2.schedules[i].schedule_id = null;
+                    output2.schedules[i].username = null;
                 }
                 if (output2.schedules[i].machine_id in dic) {
                     dic[output2.schedules[i].machine_id].push(output2.schedules[i]);
@@ -503,16 +504,21 @@ app.post('/api/show_all_user_schedules_type_after_now/', (req, res) => {
                 }
             }
 
-            // console.log(JSON.stringify(dic));
+            console.log(JSON.stringify(dic));
             var display_id = 1;
             for (key in dic) {
                 var list = dic[key];
                 list.sort(function (a, b) {
+                    // Handle one or two are null
                     if (a.end_time == null && b.end_time != null) {
                         return 1;
-                    } else if (a.end_time != null && b.end_time != null) {
+                    } else if (a.end_time != null && b.end_time == null) {
                         return -1;
+                    } else if (a.end_time != null && b.end_time != null) {
+                        return 0;
                     }
+
+                    // compare end_time
                     if (a.end_time < a.end_time) {
                         return -1;
                     } else if (a.end_time == a.end_time) {
@@ -533,8 +539,8 @@ app.post('/api/show_all_user_schedules_type_after_now/', (req, res) => {
             }
 
             res.send(JSON.stringify(output));
-            // console.log('\n');
-            // console.log(JSON.stringify(output));
+            console.log('\n');
+            console.log(JSON.stringify(output));
             return;
         });
     });

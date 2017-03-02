@@ -102,7 +102,7 @@ module.exports = {
                                               WHERE machine_id =? AND \
                                               (\
                                                   (start_time >=? AND start_time <=?) OR \
-                                                  (end_time >=? AND end_time <=?)\
+                                                  (end_time >=? AND end_time <=?) \
                                               );';
                         connection.query(queryString2, [schedules.machine_id,
                             schedules.start_time, schedules.end_time,
@@ -122,7 +122,7 @@ module.exports = {
                                                   WHERE machine_id =? AND \
                                                   (\
                                                       (start_time >=? AND start_time <=?) OR \
-                                                      (end_time >=? AND end_time <=?)\
+                                                      (end_time >=? AND end_time <=?) \
                                                   );';
                             connection.query(queryString3, [schedules.machine_id,
                                 schedules.start_time, schedules.end_time,
@@ -454,7 +454,7 @@ module.exports = {
         //    console.log(machine_type);
 
         //    Get all schedules in this location
-           const queryString1 = 'SELECT s.schedule_id, m.machine_id, s.start_time, s.end_time \
+           const queryString1 = 'SELECT s.schedule_id, m.machine_id, s.start_time, s.end_time, s.username \
                                  FROM schedules s RIGHT JOIN machines m ON s.machine_id = m.machine_id \
                                  WHERE \
                                     m.latitude = ? AND m.longitude = ? \
@@ -470,6 +470,7 @@ module.exports = {
                    return callback({message: helper.FAIL, schedules: null});
                }
                result = helper.normalizeSchedules(rows);
+            //    console.log(result);
 
                return callback({message: helper.SUCCESS, schedules: result});
            });
@@ -525,7 +526,8 @@ module.exports = {
                }
                // Get end_time
                const time_gap_minutes = 5;
-               const end_date = start_date.setMinutes(start_date.getMinutes() + time_gap_minutes);
+            //    const end_date = start_date.setMinutes(start_date.getMinutes() + time_gap_minutes);
+               const end_date = start_date.setSeconds(start_date.getSeconds() + 10);
                const end_time = moment(end_date).tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
                // console.log(start_time);
                // console.log(end_time);
@@ -551,11 +553,12 @@ module.exports = {
                        // console.log(err);
                        return callback({message: helper.FAIL});
                    }
-                //    var count = rows[0].COUNT;
-                //    if (count != 0) {
-                //        // The user has reserved other machines at that time
-                //        return callback({message: helper.USER_CAN_ONLY_RESERVE_ONE_MACHINE_AT_THE_SAME_TIME});
-                //    }
+
+                   var count = rows[0].COUNT;
+                   if (count != 0) {
+                       // The user has reserved other machines at that time
+                       return callback({message: helper.USER_CAN_ONLY_RESERVE_ONE_MACHINE_AT_THE_SAME_TIME});
+                   }
 
                 //    Check if the machine is reserved by other people at that time
                    const queryString1 = 'SELECT COUNT(*) AS COUNT \
