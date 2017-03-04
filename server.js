@@ -504,7 +504,7 @@ app.post('/api/show_all_user_schedules_type_after_now/', (req, res) => {
                 }
             }
 
-            console.log(JSON.stringify(dic));
+            // console.log(JSON.stringify(dic));
             var display_id = 1;
             for (key in dic) {
                 var list = dic[key];
@@ -539,8 +539,8 @@ app.post('/api/show_all_user_schedules_type_after_now/', (req, res) => {
             }
 
             res.send(JSON.stringify(output));
-            console.log('\n');
-            console.log(JSON.stringify(output));
+            // console.log('\n');
+            // console.log(JSON.stringify(output));
             return;
         });
     });

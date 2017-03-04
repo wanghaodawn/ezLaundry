@@ -525,9 +525,9 @@ module.exports = {
                    return callback({message: helper.USER_DOESNT_EXISTS});
                }
                // Get end_time
-               const time_gap_minutes = 5;
+               const time_gap_minutes = 60;
             //    const end_date = start_date.setMinutes(start_date.getMinutes() + time_gap_minutes);
-               const end_date = start_date.setSeconds(start_date.getSeconds() + 10);
+               const end_date = start_date.setSeconds(start_date.getSeconds() + time_gap_minutes);
                const end_time = moment(end_date).tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
                // console.log(start_time);
                // console.log(end_time);
