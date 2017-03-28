@@ -12,6 +12,7 @@ const usersModel = require('./usersModel.js');
 const machinesModel = require('./machinesModel.js');
 const schedulesAnnonymousModel = require('./schedulesAnnonymousModel.js');
 const schedulesModel = require('./schedulesModel.js');
+const landlordsModel = require('./landlordsModel.js');
 const helper = require('./helper.js');
 const dashboard = require('./dashboard.js');
 
@@ -550,6 +551,22 @@ app.post('/api/show_all_user_schedules_type_after_now/', (req, res) => {
 app.post('/api/quick_reservation/', (req, res) => {
     schedulesModel.quickResercation(connection, req.body, res, function(result) {
         // console.log(result);
+        var output = JSON.stringify(helper.stripJSON(result));
+        res.send(output);
+    });
+});
+
+// Create Landlord
+app.post('/api/add_landlord/', (req, res) => {
+    landlordsModel.createLandlord(GoogleMapAPIKey, connection, req.body, res, function(result) {
+        var output = JSON.stringify(helper.stripJSON(result));
+        res.send(output);
+    });
+});
+
+// Delete One Landlord
+app.post('/api/delete_one_landlord/', (req, res) => {
+    landlordsModel.deleteOneLandlord(GoogleMapAPIKey, connection, req.body, res, function(result) {
         var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
     });

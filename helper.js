@@ -16,6 +16,9 @@ module.exports = {
     MISSING_REQUIRED_FIELDS: 'Missing required fields',
     MISSING_NUM_MACHINES: 'Missing number of machines',
     MISSING_MACHINE_TYPE: 'Missing machine type',
+    MISSING_ADDRESS: 'Missing address',
+    MISSING_CITY: 'Missing city',
+    MISSING_EMAIL: 'Missing email',
     ITEM_DOESNT_EXIST: 'The requested item doesn\'t exist',
     INCORRECT_QUERY: 'Please enter the correct query',
     INVALID_NUMBER_FORMAT: 'Please enter the correct number format',
@@ -35,6 +38,8 @@ module.exports = {
     MACHINE_IS_NOT_AVAILABLE_AT_THAT_TIME: 'The selected machine is not available at that time',
     NO_MACHINE_THIS_ADDRESS: 'No machines are registered at this address',
     INVALID_ADDRESS: 'Please enter a valid address',
+    THERE_IS_A_LANDLORD_IN_THIS_ADDRESS: 'There is a landlord in this address',
+    NO_LANDLORDS_IN_THIS_ADDRESS: 'There are no landlords in this address',
     // If the string is not null, then change it to lowercase
     toLowerCase : function (s) {
         if (s) {
@@ -130,8 +135,7 @@ module.exports = {
             dic.machine_id = rows[i].machine_id;
             dic.idle_power = rows[i].idle_power;
             dic.running_time_minute = rows[i].running_time_minute;
-            dic.longitude = rows[i].longitude;
-            dic.latitude = rows[i].latitude;
+            dic.landloard_id = rows[i].landloard_id;
             dic.machine_type = rows[i].machine_type;
             result.push(dic);
         }
@@ -145,9 +149,35 @@ module.exports = {
             var dic = {};
             dic.username = rows[i].username;
             dic.password = rows[i].password;
+            dic.landloard_id = rows[i].landloard_id;
+            result.push(dic);
+        }
+        return result;
+    },
+
+
+    normalizeLandlords : function (rows) {
+        var result = [];
+        for (var i in rows) {
+            var dic = {};
+            dic.landloard_id = rows[i].landloard_id;
             dic.longitude = rows[i].longitude;
             dic.latitude = rows[i].latitude;
             dic.property_name = rows[i].property_name;
+            dic.email = rows[i].email;
+            result.push(dic);
+        }
+        return result;
+    },
+
+
+    normalizeUserLandlord : function (rows) {
+        var result = [];
+        for (var i in rows) {
+            var dic = {};
+            dic.username = rows[i].username;
+            dic.property_name = rows[i].property_name;
+            dic.password = rows[i].password;
             result.push(dic);
         }
         return result;

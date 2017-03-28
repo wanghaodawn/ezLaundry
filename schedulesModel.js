@@ -436,7 +436,7 @@ module.exports = {
        const machine_type = connection.escape(helper.toLowerCase(query.machine_type));
 
     //    Get user's latitude and longitude
-       const queryString0 = 'SELECT * FROM users WHERE username=?;';
+       const queryString0 = 'SELECT u.username, u.landlord_id FROM users WHERE username=?;';
        connection.query(queryString0, username, function(err, rows) {
         //    console.log(err);
            if (err) {
@@ -445,8 +445,8 @@ module.exports = {
            if (rows.length == 0) {
                return callback({message: helper.USER_DOESNT_EXISTS, schedules: null});
            }
-           const latitude = rows[0].latitude;
-           const longitude = rows[0].longitude;
+           const landlord_id = rows[0].landlord_id;
+
            const now = moment(new Date()).tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
         //    console.log(latitude);
         //    console.log(longitude);
@@ -457,13 +457,13 @@ module.exports = {
            const queryString1 = 'SELECT s.schedule_id, m.machine_id, s.start_time, s.end_time, s.username \
                                  FROM schedules s RIGHT JOIN machines m ON s.machine_id = m.machine_id \
                                  WHERE \
-                                    m.latitude = ? AND m.longitude = ? \
+                                    m.landlord_id = ? \
                                     AND m.machine_type = ? \
                                     AND ( \
                                         s.start_time IS NULL OR DATE(s.start_time) = DATE(NOW()) OR DATE(s.end_time) = DATE(NOW()) \
                                     ) \
                                  ORDER BY s.end_time;';
-           connection.query(queryString1, [latitude, longitude, machine_type], function(err, rows) {
+           connection.query(queryString1, [landlord_id, machine_type], function(err, rows) {
             //    console.log(err);
             //    console.log(rows);
                if (err) {

@@ -21,8 +21,11 @@ module.exports = {
         if (!query.password) {
             return callback({message: helper.MISSING_PASSWORD, user: null});
         }
-        if (!query.property_name) {
-            return callback({message: helper.MISSING_PROPERTY_NAME, user: null});
+        if (!query.address) {
+            return callback({message: helper.MISSING_ADDRESS, user: null});
+        }
+        if (!query.city) {
+            return callback({message: helper.MISSING_CITY, user: null});
         }
 
         // console.log(user);
@@ -39,81 +42,69 @@ module.exports = {
             }
             var user = {
                 'username':      connection.escape(helper.toLowerCase(query.username)),
-                'password':      connection.escape(query.password),
-                'property_name': connection.escape(helper.toLowerCase(query.property_name)),
+                'password':      connection.escape(query.password)
             };
             var res_message = '';
-            if ('address' in query &&'city' in query) {
-                // Use escape to prevent from SQL Injection
-                const address = helper.toLowerCase(query.address);
-                const city = helper.toLowerCase(query.city);
 
-                // Get user's desired apartment's latitude and longitude
-                helper.getLocation(GoogleMapAPIKey, address, city, function(res) {
-                    // console.log(JSON.stringify(res));
-                    res_message = res.message;
-                    // console.log(res_message);
-                    // console.log(helper.SUCCESS);
-                    // console.log(res_message == helper.SUCCESS);
-                    if (res_message == helper.SUCCESS) {
-                        user['latitude'] = res.latitude;
-                        user['longitude'] = res.longitude;
+            // Use escape to prevent from SQL Injection
+            const address = helper.toLowerCase(query.address);
+            const city = helper.toLowerCase(query.city);
+
+            var latitude = 0.0, longitude = 0.0;
+
+            // Get user's desired apartment's latitude and longitude
+            helper.getLocation(GoogleMapAPIKey, address, city, function(res) {
+                // console.log(JSON.stringify(res));
+                res_message = res.message;
+                // console.log(res_message);
+                // console.log(helper.SUCCESS);
+                // console.log(res_message == helper.SUCCESS);
+                if (res_message == helper.SUCCESS) {
+                    latitude = res.latitude;
+                    longitude = res.longitude;
+                }
+
+                // If the address is incorrect
+                if (res.message == helper.INVALID_ADDRESS) {
+                    return callback({message: helper.INVALID_ADDRESS, user: null});
+                }
+
+                // Whether the user's addres has machine or not
+                const queryString10 = 'SELECT landlord_id FROM landlords WHERE latitude = ? AND longitude = ?;';
+                connection.query(queryString10, [latitude, longitude], function(err, rows) {
+                    if (err) {
+                        return callback({message: helper.FAIL, user: null});
                     }
 
-                    // If the address is incorrect
-                    if (res.message == helper.INVALID_ADDRESS) {
-                        return callback({message: helper.INVALID_ADDRESS, user: null});
+                    // console.log(rows[0].landlord_id);
+                    if (!rows[0].landlord_id) {
+                        return callback({message: helper.NO_MACHINE_THIS_ADDRESS, user: null});
                     }
+                    user['landlord_id'] = rows[0].landlord_id;
 
-                    // Whether the user's addres has machine or not
-                    const queryString10 = 'SELECT COUNT(*) AS COUNT FROM machines WHERE latitude = ? AND longitude = ?;';
-                    connection.query(queryString10, [user['latitude'], user['longitude']], function(err, rows) {
+                    console.log(user);
+
+                    const queryString2 = 'INSERT INTO users SET ?;';
+                    connection.query(queryString2, user, function(err, rows) {
                         if (err) {
                             return callback({message: helper.FAIL, user: null});
                         }
-
-                        var count = rows[0].COUNT;
-                        if (count == 0) {
-                            return callback({message: helper.NO_MACHINE_THIS_ADDRESS, user: null});
-                        }
-
-                        const queryString2 = 'INSERT INTO users SET ?;';
-                        connection.query(queryString2, user, function(err, rows) {
-                            if (err) {
-                                return callback({message: helper.FAIL, user: null});
-                            }
-                            const queryString3 = 'SELECT * FROM users WHERE username=?;';
-                            connection.query(queryString3, user.username, function(err, rows) {
-                                // console.log(err);
-                                if (err) {
-                                    return callback({message: helper.FAIL, user: null});
-                                }
-                                if (res_message == helper.ZERO_RESULTS) {
-                                    return callback({message: helper.ZERO_RESULTS, user: rows[0]});
-                                }
-                                return callback({message: helper.SUCCESS, user: rows[0]});
-                            });
-                        });
-                    });
-                });
-            } else {
-                const queryString2 = 'INSERT INTO users SET ?;';
-                connection.query(queryString2, user, function(err, rows) {
-                    if (err) {
-                        return callback({message: helper.FAIL, user: null});
-                    } else {
-                        const queryString3 = 'SELECT * FROM users WHERE username=?;';
+                        const queryString3 = 'SELECT u.username, l.property_name, u.password \
+                                              FROM users u, landlords l \
+                                              WHERE u.username=? AND u.landlord_id = l.landlord_id;';
                         connection.query(queryString3, user.username, function(err, rows) {
                             // console.log(err);
                             if (err) {
                                 return callback({message: helper.FAIL, user: null});
-                            } else {
-                                return callback({message: helper.SUCCESS, user: rows[0]});
                             }
+                            if (res_message == helper.ZERO_RESULTS) {
+                                return callback({message: helper.ZERO_RESULTS, user: rows[0]});
+                            }
+                            return callback({message: helper.SUCCESS, user: rows[0]});
                         });
-                    }
+                    });
                 });
-            }
+            });
         });
     },
 
@@ -150,7 +141,9 @@ module.exports = {
             }
             // console.log(username);
             // console.log(password);
-            const queryString2 = 'SELECT * FROM users WHERE username=?;';
+            const queryString2 = 'SELECT u.username, l.property_name, u.password \
+                                  FROM users u, landlords l \
+                                  WHERE u.username=? AND u.landlord_id = l.landlord_id';
             connection.query(queryString2, user.username, function(err, rows) {
                 // console.log(err);
                 if (err) {
@@ -259,7 +252,9 @@ module.exports = {
                     return callback({message: helper.FAIL, user: null});
                 }
                 // Success
-                result = helper.normalizeUsers(rows);
+                result = helper.
+
+                Users(rows);
                 return callback({message: helper.SUCCESS, user: result});
             });
         } else {
