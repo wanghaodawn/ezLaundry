@@ -40,6 +40,8 @@ module.exports = {
     INVALID_ADDRESS: 'Please enter a valid address',
     THERE_IS_A_LANDLORD_IN_THIS_ADDRESS: 'There is a landlord in this address',
     NO_LANDLORDS_IN_THIS_ADDRESS: 'There are no landlords in this address',
+    NO_EMAIL_PASSWORD_FOUND: 'Cannot find the email password in local file system',
+    FAILED_SENDING_EMAIL: 'Failed to send the email to landlord',
     // If the string is not null, then change it to lowercase
     toLowerCase : function (s) {
         if (s) {
@@ -71,6 +73,15 @@ module.exports = {
         fs.readFile('GOOGLE_MAP_API_KEY.dat', 'utf8', function (err, data) {
           if (err) {
                 return callback('Cannot find the API Key of Google Map');
+            }
+            return callback(data);
+        });
+    },
+
+    getEmailPassword : function (callback) {
+        fs.readFile('email-info.dat', 'utf8', function (err, data) {
+          if (err) {
+                return callback('Cannot find the email password');
             }
             return callback(data);
         });

@@ -7,6 +7,7 @@ const moment = require('moment-timezone');
 const session = require('client-sessions');
 const bodyParser = require('body-parser');
 const https = require('https');
+const nodemailer = require('nodemailer');
 
 const usersModel = require('./usersModel.js');
 const machinesModel = require('./machinesModel.js');
@@ -19,7 +20,29 @@ const dashboard = require('./dashboard.js');
 var app = express();
 const port = 3000;
 
-process.env.TZ = 'EST'
+process.env.TZ = 'EST';
+
+const emailAddress = 'no.reply.ezlaundry@gmail.com';
+var emailPassword = '';
+var transporter = '';
+var mailOptions = {}
+helper.getEmailPassword(function (result) {
+    emailPassword = result.trim();
+    if (emailPassword == '') {
+        console.log(helper.NO_EMAIL_PASSWORD_FOUND);
+    } else {
+        console.log("Found Email Password");
+        transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: emailAddress,
+                pass: emailPassword
+            }
+        });
+        console.log(emailAddress);
+        console.log(emailPassword);
+    }
+});
 
 // Configurate the connection to MySQL
 var connection = mysql.createConnection({
@@ -569,6 +592,34 @@ app.post('/api/delete_one_landlord/', (req, res) => {
     landlordsModel.deleteOneLandlord(GoogleMapAPIKey, connection, req.body, res, function(result) {
         var output = JSON.stringify(helper.stripJSON(result));
         res.send(output);
+    });
+});
+
+// Send email to landlord, get username from the app
+app.post('/api/send_email_to_landlord/', (req, res) => {
+    landlordsModel.sendEmailToLandlord(connection, req.body, res, function(result) {
+        var result = helper.stripJSON(result);
+
+        if (result.message != helper.SUCCESS) {
+            return res.send({message: result.message});
+        }
+
+        // console.log(transporter);
+        var mailOptions = {
+            from:    emailAddress,
+            to:      result.email,
+            subject: `[Maintainese Requested] @ ${result.property_name} by ${req.body.username}`,
+            html: '<b>Maintainese Requested!</b>' // html body
+        };
+
+        // send mail with defined transport object
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                return res.send({message: helper.FAILED_SENDING_EMAIL});
+            }
+            console.log('Message %s sent: %s', info.messageId, info.response);
+        });
+        return res.send({message: result.message});
     });
 });
 

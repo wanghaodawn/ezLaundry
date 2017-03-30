@@ -142,5 +142,38 @@ module.exports = {
                 return callback({message: helper.SUCCESS});
             });
         });
+    },
+
+
+    sendEmailToLandlord : function (connection, query, res, callback) {
+        // console.log(query);
+        if (JSON.stringify(query) == '{}') {
+            // console.log('null_query');
+            // Fail, return
+            return callback({message: helper.MISSING_REQUIRED_FIELDS, email: null});
+        }
+        // If any of the required fields is missing, then return
+        if (!query.username) {
+            return callback({message: helper.MISSING_USERNAME, email: null});
+        }
+        const username = connection.escape(helper.toLowerCase(query.username));
+
+        // Check whether the address has already has a landlord
+        const queryString1 = 'SELECT l.email, l.property_name FROM landlords l, users u \
+                              WHERE u.username = ? AND l.landlord_id = u.landlord_id;';
+        // console.log(queryString1);
+        connection.query(queryString1, username, function(err, rows) {
+            if (err) {
+                return callback({message: helper.FAIL});
+            }
+            if (rows.length == 0) {
+                // If find dumplicate primary keys in the database, return
+                return callback({message: helper.NO_LANDLORDS_IN_THIS_ADDRESS});
+            }
+
+            const email = rows[0].email;
+            const property_name = rows[0].property_name;
+            return callback({message: helper.SUCCESS, email: email, property_name: property_name});
+        });
     }
 }
