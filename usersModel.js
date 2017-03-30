@@ -77,7 +77,7 @@ module.exports = {
                     }
 
                     // console.log(rows[0].landlord_id);
-                    if (!rows[0].landlord_id) {
+                    if (!rows.length == 0) {
                         return callback({message: helper.NO_MACHINE_THIS_ADDRESS, user: null});
                     }
                     user['landlord_id'] = rows[0].landlord_id;
@@ -89,7 +89,7 @@ module.exports = {
                         if (err) {
                             return callback({message: helper.FAIL, user: null});
                         }
-                        const queryString3 = 'SELECT u.username, l.property_name, u.password \
+                        const queryString3 = 'SELECT u.username, l.property_name, u.password, u.landlord_id \
                                               FROM users u, landlords l \
                                               WHERE u.username=? AND u.landlord_id = l.landlord_id;';
                         connection.query(queryString3, user.username, function(err, rows) {
@@ -141,7 +141,7 @@ module.exports = {
             }
             // console.log(username);
             // console.log(password);
-            const queryString2 = 'SELECT u.username, l.property_name, u.password \
+            const queryString2 = 'SELECT u.username, l.property_name, u.password, u.landlord_id \
                                   FROM users u, landlords l \
                                   WHERE u.username=? AND u.landlord_id = l.landlord_id';
             connection.query(queryString2, user.username, function(err, rows) {
@@ -156,6 +156,72 @@ module.exports = {
                     return callback({message: helper.WRONG_PASSWORD, user: null});
                 }
                 return callback({message: helper.SUCCESS, user: rows[0]});
+            });
+        });
+    },
+
+
+    updateUserInfo : function(GoogleMapAPIKey, connection, query, res, callback) {
+        // console.log(query);
+        if (JSON.stringify(query) == '{}') {
+            return callback({message: helper.MISSING_REQUIRED_FIELDS});
+        }
+        if (!query.username) {
+            return callback({message: helper.MISSING_USERNAME});
+        }
+        if (!query.new_password) {
+            return callback({message: helper.MISSING_NEW_PASSWORD});
+        }
+        if (!query.address) {
+            return callback({message: helper.MISSING_ADDRESS});
+        }
+        if (!query.city) {
+            return callback({message: helper.MISSING_CITY});
+        }
+
+        var user = {
+            'username': connection.escape(helper.toLowerCase(query.username)),
+            'new_password': connection.escape(helper.toLowerCase(query.new_password)),
+        }
+        var address =  helper.toLowerCase(query.address);
+        var city = helper.toLowerCase(query.city);
+
+        var latitude = 0.0;
+        var longitude = 0.0;
+        helper.getLocation(GoogleMapAPIKey, address, city, function(res) {
+            if (res.message == helper.INVALID_ADDRESS) {
+                return callback({message: helper.INVALID_ADDRESS});
+            }
+
+            if (res.message == helper.SUCCESS) {
+                latitude = res.latitude;
+                longitude = res.longitude;
+            }
+
+            // Check whether the latitude and longitude is in the Database
+            const queryString1 = 'SELECT landlord_id FROM landlords WHERE latitude = ? AND longitude = ?;';
+            connection.query(queryString1, [latitude, longitude], function(err, rows) {
+                if (err) {
+                    return callback({message: helper.FAIL});
+                }
+
+                if (rows.length == 0) {
+                    return callback({message: helper.NO_MACHINE_THIS_ADDRESS});
+                }
+
+                user['landlord_id'] = rows[0].landlord_id;
+
+                console.log(user);
+
+                // Update user table
+                const queryString2 = 'UPDATE users SET password = ?, landlord_id = ? WHERE username = ?;';
+                connection.query(queryString2, [user.new_password, user.landlord_id, user.username], function(err, rows) {
+                    if (err) {
+                        return callback({message: helper.FAIL});
+                    }
+
+                    return callback({message: helper.SUCCESS});
+                });
             });
         });
     },

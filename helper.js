@@ -42,6 +42,7 @@ module.exports = {
     NO_LANDLORDS_IN_THIS_ADDRESS: 'There are no landlords in this address',
     NO_EMAIL_PASSWORD_FOUND: 'Cannot find the email password in local file system',
     FAILED_SENDING_EMAIL: 'Failed to send the email to landlord',
+    MISSING_NEW_PASSWORD: 'Mssing new_password',
     // If the string is not null, then change it to lowercase
     toLowerCase : function (s) {
         if (s) {

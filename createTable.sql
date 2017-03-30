@@ -1,3 +1,14 @@
+-- Landlord
+CREATE TABLE IF NOT EXISTS landlords (
+    landlord_id INT NOT NULL AUTO_INCREMENT,
+    latitude DECIMAL (11, 7) NOT NULL,
+    longitude DECIMAL(11, 7) NOT NULL,
+    property_name VARCHAR(40) NOT NULL,
+    email VARCHAR(254) NOT NULL,
+    PRIMARY KEY(landlord_id)
+);
+
+
 -- Users
 CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(40) NOT NULL,
@@ -18,17 +29,6 @@ CREATE TABLE IF NOT EXISTS machines (
     machine_type VARCHAR(10) NOT NULL,
     PRIMARY KEY(machine_id),
     FOREIGN KEY (landlord_id) REFERENCES landlords(landlord_id) ON DELETE CASCADE
-);
-
-
--- Landlord
-CREATE TABLE IF NOT EXISTS landlords (
-    landlord_id INT NOT NULL AUTO_INCREMENT,
-    latitude DECIMAL (11, 7) NOT NULL,
-    longitude DECIMAL(11, 7) NOT NULL,
-    property_name VARCHAR(40) NOT NULL,
-    email VARCHAR(254) NOT NULL,
-    PRIMARY KEY(landlord_id)
 );
 
 

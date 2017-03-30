@@ -254,6 +254,15 @@ app.post('/api/login_user/', (req, res) => {
     });
 });
 
+// Update User Info
+app.post('/api/update_user_info/', (req, res) => {
+    usersModel.updateUserInfo(GoogleMapAPIKey, connection, req.body, res, function(result) {
+        var output = JSON.stringify(helper.stripJSON(result));
+        // console.log(output);
+        res.send(output);
+    });
+});
+
 // Delte one user
 app.post('/api/delete_one_user/', (req, res) => {
     usersModel.deleteOneUser(connection, req.body, res, function(result) {
