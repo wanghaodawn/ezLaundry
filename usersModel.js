@@ -3,6 +3,7 @@ const hbs = require('hbs');
 const fs = require('fs');
 const url = require('url');
 const moment = require('moment-timezone');
+const Isemail = require('isemail');
 
 const helper = require('./helper.js');
 
@@ -29,6 +30,11 @@ module.exports = {
         }
         if (!query.city) {
             return callback({message: helper.MISSING_CITY, user: null});
+        }
+
+        // Check whether it is an email or not
+        if (!Isemail.validate(query.email)) {
+            return callback({message: helper.WRONG_EMAIL_FORMAT, user: null});
         }
 
         var user = {

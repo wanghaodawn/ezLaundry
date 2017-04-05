@@ -50,6 +50,7 @@ module.exports = {
     WRONG_CODE: 'Please enter the correct code',
     EXPIRED_CODE: 'This code has expired',
     EMAIL_HAS_ALREADY_BEEN_VERIFIED: 'This address has already been verified',
+    WRONG_EMAIL_FORMAT: 'Please enter correct email addresses',
     // If the string is not null, then change it to lowercase
     toLowerCase : function (s) {
         if (s) {
