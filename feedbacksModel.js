@@ -30,6 +30,7 @@ module.exports = {
         const queryString1 = 'INSERT INTO feedbacks SET ?;';
         connection.query(queryString1, data, function(err, rows) {
             if (err) {
+                console.log(err);
                 return callback({message: helper.FAIL, email: null});
             }
         });
@@ -37,6 +38,7 @@ module.exports = {
         const queryString2 = 'SELECT email FROM users WHERE username = ?;';
         connection.query(queryString1, data.username, function(err, rows) {
             if (err) {
+                console.log(err);
                 return callback({message: helper.FAIL, email: null});
             }
 

@@ -58,6 +58,7 @@ module.exports = {
             // console.log(queryString1);
             connection.query(queryString1, [landlord['latitude'], landlord['longitude']], function(err, rows) {
                 if (err) {
+                    console.log(err);
                     return callback({message: helper.FAIL});
                 }
                 var count = rows[0].COUNT;
@@ -71,6 +72,7 @@ module.exports = {
                 const queryString2 = 'INSERT INTO landlords SET ?;';
                 connection.query(queryString2, landlord, function(err, rows) {
                     if (err) {
+                        console.log(err);
                         return callback({message: helper.FAIL});
                     }
                 });
@@ -123,6 +125,7 @@ module.exports = {
             // console.log(queryString1);
             connection.query(queryString1, [landlord['latitude'], landlord['longitude']], function(err, rows) {
                 if (err) {
+                    console.log(err);
                     return callback({message: helper.FAIL});
                 }
                 var count = rows[0].COUNT;
@@ -136,6 +139,7 @@ module.exports = {
                 // console.log(queryString1);
                 connection.query(queryString2, [landlord['latitude'], landlord['longitude']], function(err, rows) {
                     if (err) {
+                        console.log(err);
                         return callback({message: helper.FAIL});
                     }
                 });
@@ -167,6 +171,7 @@ module.exports = {
         // console.log(queryString1);
         connection.query(queryString1, username, function(err, rows) {
             if (err) {
+                console.log(err);
                 return callback({message: helper.FAIL});
             }
             if (rows.length == 0) {

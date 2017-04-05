@@ -182,6 +182,7 @@ module.exports = {
         // console.log(queryString1);
         connection.query(queryString1, user.username, function(err, rows) {
             if (err) {
+                console.log(err);
                 return callback({message: helper.FAIL, user: null});
             }
             var count = rows[0].COUNT;
@@ -189,14 +190,28 @@ module.exports = {
                 // If find dumplicate primary keys in the database, return
                 return callback({message: helper.USER_DOESNT_EXISTS, user: null});
             }
+
+            const queryString2 = 'SELECT has_verified_email FROM users WHERE username = ?;';
+            connection.query(queryString2, user.username, function(err, rows) {
+                if (err) {
+                    console.log(err);
+                    return callback({message: helper.FAIL, user: null});
+                }
+
+                if (rows[0].has_verified_email == 0) {
+                    return callback({message: helper.PLEASE_VERIFY_EMAIL_FIRST, user: null});
+                }
+            });
+
             // console.log(username);
             // console.log(password);
-            const queryString2 = 'SELECT u.username, l.property_name, u.password, u.landlord_id \
+            const queryString3 = 'SELECT u.username, l.property_name, u.password, u.landlord_id \
                                   FROM users u, landlords l \
                                   WHERE u.username=? AND u.landlord_id = l.landlord_id';
-            connection.query(queryString2, user.username, function(err, rows) {
+            connection.query(queryString3, user.username, function(err, rows) {
                 // console.log(err);
                 if (err) {
+                    console.log(err);
                     return callback({message: helper.FAIL, user: null});
                 }
                 var originalPassword = rows[0].password;
@@ -253,6 +268,7 @@ module.exports = {
             const queryString1 = 'SELECT landlord_id FROM landlords WHERE latitude = ? AND longitude = ?;';
             connection.query(queryString1, [latitude, longitude], function(err, rows) {
                 if (err) {
+                    console.log(err);
                     return callback({message: helper.FAIL});
                 }
 
@@ -266,6 +282,7 @@ module.exports = {
                 const queryString2 = 'UPDATE users SET password = ?, landlord_id = ? WHERE username = ?;';
                 connection.query(queryString2, [user.new_password, user.landlord_id, user.username], function(err, rows) {
                     if (err) {
+                        console.log(err);
                         return callback({message: helper.FAIL});
                     }
                     return callback({message: helper.SUCCESS});
@@ -291,6 +308,7 @@ module.exports = {
             const queryString1 = 'SELECT COUNT(*) AS COUNT FROM users WHERE username=?;';
             connection.query(queryString1, user.username, function(err, rows) {
                 if (err) {
+                    console.log(err);
                     return callback({message: helper.FAIL});
                 }
                 var count = rows[0].COUNT;
@@ -302,6 +320,7 @@ module.exports = {
                 connection.query(queryString2, user.username, function(err, rows) {
                     if (err) {
                         // Fail, return
+                        console.log(err);
                         return callback({message: helper.FAIL});
                     }
                     // Success
@@ -332,6 +351,7 @@ module.exports = {
             connection.query(queryString, function(err, rows) {
                 if (err) {
                     // Fail, return
+                    console.log(err);
                     return callback({message: helper.FAIL});
                 }
                 // Success
@@ -363,6 +383,7 @@ module.exports = {
             connection.query(queryString, function(err, rows) {
                 if (err) {
                     // Fail, return
+                    console.log(err);
                     return callback({message: helper.FAIL, user: null});
                 }
                 // Success
@@ -386,6 +407,7 @@ module.exports = {
         // console.log(queryString1);
         connection.query(queryString1, username, function(err, rows) {
             if (err) {
+                console.log(err);
                 return callback({message: helper.FAIL, user: null});
             }
             var count = rows[0].COUNT;
@@ -399,6 +421,7 @@ module.exports = {
             connection.query(queryString2, username, function(err, rows) {
                 // console.log(err);
                 if (err) {
+                    console.log(err);
                     return callback({message: helper.FAIL, user: null});
                 }
                 var originalPassword = rows[0].password;
@@ -430,6 +453,7 @@ module.exports = {
         // console.log(queryString1);
         connection.query(queryString1, user.username, function(err, rows) {
             if (err) {
+                console.log(err);
                 return callback({message: helper.FAIL, user: null});
             }
             var count = rows[0].COUNT;
@@ -440,12 +464,14 @@ module.exports = {
             const queryString2 = 'INSERT INTO users SET ?;';
             connection.query(queryString2, user, function(err, rows) {
                 if (err) {
+                    console.log(err);
                     return callback({message: helper.FAIL, user: null});
                 }
                 const queryString3 = 'SELECT * FROM users WHERE username=?;';
                 connection.query(queryString3, user.username, function(err, rows) {
                     // console.log(err);
                     if (err) {
+                        console.log(err);
                         return callback({message: helper.FAIL, user: null});
                     }
                     return callback({message: helper.SUCCESS, user: rows[0]});
@@ -485,12 +511,14 @@ module.exports = {
             const queryString2 = 'UPDATE users SET ? WHERE username=?;';
             connection.query(queryString2, [user, username], function(err, rows) {
                 if (err) {
+                    console.log(err);
                     return callback({message: helper.FAIL, user: originalUser});
                 }
                 const queryString3 = 'SELECT * FROM users WHERE username=?;';
                 connection.query(queryString3, username, function(err, rows) {
                     // console.log(err);
                     if (err) {
+                        console.log(err);
                         return callback({message: helper.FAIL, user: originalUser});
                     }
                     return callback({message: helper.SUCCESS, user: stripUser(rows[0])});

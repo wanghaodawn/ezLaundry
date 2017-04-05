@@ -51,6 +51,7 @@ module.exports = {
     EXPIRED_CODE: 'This code has expired',
     EMAIL_HAS_ALREADY_BEEN_VERIFIED: 'This address has already been verified',
     WRONG_EMAIL_FORMAT: 'Please enter correct email addresses',
+    PLEASE_VERIFY_EMAIL_FIRST: 'Please verify your email first',
     // If the string is not null, then change it to lowercase
     toLowerCase : function (s) {
         if (s) {
@@ -81,6 +82,7 @@ module.exports = {
     getGooglMapAPIKey : function (callback) {
         fs.readFile('GOOGLE_MAP_API_KEY.dat', 'utf8', function (err, data) {
           if (err) {
+                console.log(err);
                 return callback('Cannot find the API Key of Google Map');
             }
             return callback(data);
@@ -90,6 +92,7 @@ module.exports = {
     getEmailPassword : function (callback) {
         fs.readFile('email-info.dat', 'utf8', function (err, data) {
           if (err) {
+                console.log(err);
                 return callback('Cannot find the email password');
             }
             return callback(data);
@@ -113,6 +116,7 @@ module.exports = {
                 const longitude = body['results'][0]['geometry']['location']['lng'];
                 return callback({message: 'Success', latitude: latitude, longitude: longitude});
             } else {
+                console.log(error);
                 return callback({message: 'Database Failure', latitude: null, longitude: null});
             }
         });

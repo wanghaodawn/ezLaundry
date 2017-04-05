@@ -35,6 +35,7 @@ module.exports = {
         const queryString1 = 'SELECT COUNT(*) AS COUNT FROM machines WHERE machine_id=?;';
         connection.query(queryString1, machine.machine_id, function(err, rows) {
             if (err) {
+                console.log(err);
                 return callback({message: helper.FAIL});
             }
             var count = rows[0].COUNT;
@@ -64,6 +65,7 @@ module.exports = {
                 const queryString10 = 'SELECT landlord_id FROM landlords WHERE latitude = ? AND longitude = ?;';
                 connection.query(queryString10, [latitude, longitude], function(err, rows) {
                     if (err) {
+                        console.log(err);
                         return callback({message: helper.FAIL});
                     }
 
@@ -76,6 +78,7 @@ module.exports = {
                     connection.query(queryString2, machine, function(err, rows) {
                         if (err) {
                             // Fail, return
+                            console.log(err);
                             return callback({message: helper.FAIL});
                         }
                         // Success
@@ -108,6 +111,7 @@ module.exports = {
             const queryString1 = 'SELECT COUNT(*) AS COUNT FROM machines WHERE machine_id=?;';
             connection.query(queryString1, machine.machine_id, function(err, rows) {
                 if (err) {
+                    console.log(err);
                     return callback({message: helper.FAIL});
                 }
                 var count = rows[0].COUNT;
@@ -119,6 +123,7 @@ module.exports = {
                 connection.query(queryString2, machine.machine_id, function(err, rows) {
                     if (err) {
                         // Fail, return
+                        console.log(err);
                         return callback({message: helper.FAIL});
                     }
                     // Success
@@ -149,6 +154,7 @@ module.exports = {
             connection.query(queryString, function(err, rows) {
                 if (err) {
                     // Fail, return
+                    console.log(err);
                     return callback({message: helper.FAIL});
                 }
                 // Success
@@ -180,6 +186,7 @@ module.exports = {
             connection.query(queryString, function(err, rows) {
                 if (err) {
                     // Fail, return
+                    console.log(err);
                     return callback({message: helper.FAIL, machine: null});
                 }
                 // Success

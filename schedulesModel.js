@@ -35,6 +35,7 @@ module.exports = {
         connection.query(queryString000, query.machine_id, function(err, rows) {
             if (err) {
                 // Fail, return
+                console.log(err);
                 return callback({message: helper.FAIL});
             }
             var count = rows[0].COUNT;
@@ -46,6 +47,7 @@ module.exports = {
             connection.query(queryString00, username, function(err, rows) {
                 if (err) {
                     // Fail, return
+                    console.log(err);
                     return callback({message: helper.FAIL});
                 }
                 var count = rows[0].COUNT;
@@ -58,6 +60,7 @@ module.exports = {
                 connection.query(queryString0, query.machine_id, function(err, rows) {
                     if (err) {
                         // Fail, return
+                        console.log(err);
                         return callback({message: helper.FAIL});
                     }
                     // Success
@@ -87,7 +90,7 @@ module.exports = {
                         schedules.start_time, schedules.end_time,
                         schedules.start_time, schedules.end_time], function(err, rows) {
                         if (err) {
-                            // console.log(err);
+                            console.log(err);
                             return callback({message: helper.FAIL});
                         }
                         var count = rows[0].COUNT;
@@ -108,7 +111,7 @@ module.exports = {
                             schedules.start_time, schedules.end_time,
                             schedules.start_time, schedules.end_time], function(err, rows) {
                             if (err) {
-                                // console.log(err);
+                                console.log(err);
                                 return callback({message: helper.FAIL});
                             }
                             var count = rows[0].COUNT;
@@ -128,7 +131,7 @@ module.exports = {
                                 schedules.start_time, schedules.end_time,
                                 schedules.start_time, schedules.end_time], function(err, rows) {
                                 if (err) {
-                                    // console.log(err);
+                                    console.log(err);
                                     return callback({message: helper.FAIL});
                                 }
                                 var count = rows[0].COUNT;
@@ -143,6 +146,7 @@ module.exports = {
                             connection.query(queryString4, schedules, function(err, rows) {
                                 if (err) {
                                     // Fail, return
+                                    console.log(err);
                                     return callback({message: helper.FAIL});
                                 }
                                 // Success
@@ -184,6 +188,7 @@ module.exports = {
         connection.query(queryString1, [username, query.machine_id], function(err, rows) {
             if (err) {
                 // Fail, return
+                console.log(err);
                 return callback({message: helper.FAIL});
             }
             var count = rows[0].COUNT;
@@ -197,7 +202,7 @@ module.exports = {
                 connection.query(queryString2, [username, query.machine_id], function(err, rows) {
                     if (err) {
                         // Fail, return
-                        // console.log(err);
+                        console.log(err);
                         return callback({message: helper.FAIL});
                     }
                     // Success
@@ -235,6 +240,7 @@ module.exports = {
         connection.query(queryString1, [username, query.machine_id], function(err, rows) {
             if (err) {
                 // Fail, return
+                console.log(err);
                 return callback({message: helper.FAIL});
             }
             var count = rows[0].COUNT;
@@ -248,7 +254,7 @@ module.exports = {
                 connection.query(queryString2, [username, query.machine_id], function(err, rows) {
                     if (err) {
                         // Fail, return
-                        // console.log(err);
+                        console.log(err);
                         return callback({message: helper.FAIL});
                     }
                     // Success
@@ -279,6 +285,7 @@ module.exports = {
         connection.query(queryString1, query.machine_id, function(err, rows) {
             if (err) {
                 // Fail, return
+                console.log(err);
                 return callback({message: helper.FAIL});
             }
             var count = rows[0].COUNT;
@@ -290,7 +297,7 @@ module.exports = {
             connection.query(queryString2, query.machine_id, function(err, rows) {
                 if (err) {
                     // Fail, return
-                    // console.log(err);
+                    console.log(err);
                     return callback({message: helper.FAIL});
                 }
                 // Success
@@ -318,6 +325,7 @@ module.exports = {
             connection.query(queryString, function(err, rows) {
                 if (err) {
                     // Fail, return
+                    console.log(err);
                     return callback({message: helper.FAIL});
                 } else {
                     // Success
@@ -349,6 +357,7 @@ module.exports = {
            connection.query(queryString, function(err, rows) {
                if (err) {
                    // Fail, return
+                   console.log(err);
                    return callback({message: helper.FAIL, schedules: null});
                }// Success
                result = helper.normalizeSchedules(rows);
@@ -382,6 +391,7 @@ module.exports = {
        connection.query(queryString0, username, function(err, rows) {
         //    console.log(err);
            if (err) {
+               console.log(err);
                return callback({message: helper.FAIL, schedules: null});
            }
            if (rows.length == 0) {
@@ -409,6 +419,7 @@ module.exports = {
             //    console.log(err);
             //    console.log(rows);
                if (err) {
+                   console.log(err);
                    return callback({message: helper.FAIL, schedules: null});
                }
                result = helper.normalizeSchedules(rows);
@@ -441,6 +452,7 @@ module.exports = {
        connection.query(queryString0, username, function(err, rows) {
         //    console.log(err);
            if (err) {
+               console.log(err);
                return callback({message: helper.FAIL, schedules: null});
            }
            if (rows.length == 0) {
@@ -469,6 +481,7 @@ module.exports = {
            connection.query(queryString1, [landlord_id, machine_type], function(err, rows) {
             //    console.log(rows);
                if (err) {
+                   console.log(err);
                    return callback({message: helper.FAIL, schedules: null});
                }
                result = helper.normalizeSchedules(rows);
@@ -508,6 +521,7 @@ module.exports = {
        connection.query(queryString000, query.machine_id, function(err, rows) {
            if (err) {
                // Fail, return
+               console.log(err);
                return callback({message: helper.FAIL});
            }
            var count = rows[0].COUNT;
@@ -519,6 +533,7 @@ module.exports = {
            connection.query(queryString00, username, function(err, rows) {
                if (err) {
                    // Fail, return
+                   console.log(err);
                    return callback({message: helper.FAIL});
                }
                var count = rows[0].COUNT;
@@ -552,7 +567,7 @@ module.exports = {
                    schedules.start_time, schedules.end_time,
                    schedules.start_time, schedules.end_time], function(err, rows) {
                    if (err) {
-                       // console.log(err);
+                       console.log(err);
                        return callback({message: helper.FAIL});
                    }
 
@@ -574,7 +589,7 @@ module.exports = {
                        schedules.start_time, schedules.end_time,
                        schedules.start_time, schedules.end_time], function(err, rows) {
                        if (err) {
-                           // console.log(err);
+                           console.log(err);
                            return callback({message: helper.FAIL});
                        }
                        var count = rows[0].COUNT;
@@ -594,7 +609,7 @@ module.exports = {
                            schedules.start_time, schedules.end_time,
                            schedules.start_time, schedules.end_time], function(err, rows) {
                            if (err) {
-                               // console.log(err);
+                               console.log(err);
                                return callback({message: helper.FAIL});
                            }
                            var count = rows[0].COUNT;
@@ -609,6 +624,7 @@ module.exports = {
                        connection.query(queryString3, schedules, function(err, rows) {
                            if (err) {
                                // Fail, return
+                               console.log(err);
                                return callback({message: helper.FAIL});
                            }
                            // Success

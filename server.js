@@ -19,7 +19,7 @@ const dashboard = require('./dashboard.js');
 
 var app = express();
 const port = 3000;
-const dns = 'http://localhost:3000/'
+const dns = 'http://128.237.134.80:3000/'
 
 process.env.TZ = 'EST';
 
@@ -79,7 +79,8 @@ app.use((req, res, next) => {
   console.log(log);
   fs.appendFile('server.log', log + '\n', (err) => {
     if (err) {
-      console.log('Unable to append to file system');
+        console.log(err);
+        console.log('Unable to append to file system');
     }
   });
   next();
@@ -252,12 +253,11 @@ app.post('/api/add_user/', (req, res) => {
                 subject: '[ezLaundry] Please Verify Your Email Address Within 24 Hours',
                 html: `<a href=${dns}api/verify_email_address?code=${result.code}><h3>Please Press Here to Verify Your Email Address</h3></a>` // html body
             };
-            // console.log(mailOptions);
 
             // send mail with defined transport object
             transporter.sendMail(mailOptions, (error, info) => {
-                // console.log(error);
                 if (error) {
+                    console.log(error);
                     return res.send({message: helper.FAILED_SENDING_EMAIL});
                 }
                 console.log('Message %s sent: %s', info.messageId, info.response);
@@ -648,6 +648,7 @@ app.post('/api/send_email_to_landlord/', (req, res) => {
         // send mail with defined transport object
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
+                console.log(error);
                 return res.send({message: helper.FAILED_SENDING_EMAIL});
             }
             console.log('Message %s sent: %s', info.messageId, info.response);
@@ -676,6 +677,7 @@ app.post('/api/send_feedback/', (req, res) => {
         // send mail with defined transport object
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
+                console.log(error);
                 return res.send({message: helper.FAILED_SENDING_EMAIL});
             }
             console.log('Message %s sent: %s', info.messageId, info.response);
