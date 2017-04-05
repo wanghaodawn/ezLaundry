@@ -46,6 +46,10 @@ module.exports = {
     FAILED_SENDING_EMAIL: 'Failed to send the email',
     MISSING_NEW_PASSWORD: 'Mssing new_password',
     MISSING_REPORT_BODY: 'Missing report body',
+    MISSING_CODE: 'Missing the code to activate your email address',
+    WRONG_CODE: 'Please enter the correct code',
+    EXPIRED_CODE: 'This code has expired',
+    EMAIL_HAS_ALREADY_BEEN_VERIFIED: 'This address has already been verified',
     // If the string is not null, then change it to lowercase
     toLowerCase : function (s) {
         if (s) {

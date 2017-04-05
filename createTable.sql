@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS email_verifications (
     username VARCHAR(40) NOT NULL,
     timestamp DATETIME NOT NULL,
     code VARCHAR(128),
+    type VARCHAR(40),
     PRIMARY KEY (id),
     FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
 );

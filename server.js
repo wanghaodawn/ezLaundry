@@ -249,8 +249,8 @@ app.post('/api/add_user/', (req, res) => {
             var mailOptions = {
                 from:    emailAddress,
                 to:      result.user.email.replace(/\'/g, ''),
-                subject: '[ezLaundry] Please Verify Your Email Address',
-                html: `<a href=${dns}api/verify_email_address/${result.code}><h3>Please Press Here to Verify Your Email Address</h3></a>` // html body
+                subject: '[ezLaundry] Please Verify Your Email Address Within 24 Hours',
+                html: `<a href=${dns}api/verify_email_address?code=${result.code}><h3>Please Press Here to Verify Your Email Address</h3></a>` // html body
             };
             // console.log(mailOptions);
 
@@ -685,8 +685,11 @@ app.post('/api/send_feedback/', (req, res) => {
 });
 
 // Let the user verify the email address
-// api.get('/api/verify_emailaddress/', (req, res) => {
-// });
+app.get('/api/verify_email_address?', (req, res) => {
+    usersModel.verifyEmailAddress(connection, req.query, res, function(result) {
+        return res.send(result.message);
+    });
+});
 
 // Start the server
 app.listen(port);

@@ -35,14 +35,15 @@ module.exports = {
             'username':             connection.escape(helper.toLowerCase(query.username)),
             'password':             helper.hashPassword(query.username + query.password),
             'email':                connection.escape(helper.toLowerCase(query.email)),
-            'has_verified_email':   0
+            'has_verified_email':   0,
         };
 
-        console.log(user);
+        // console.log(user);
         const queryString1 = 'SELECT COUNT(*) AS COUNT FROM users WHERE username=? OR email=?;';
         // console.log(queryString1);
         connection.query(queryString1, [user.username, user.email], function(err, rows) {
             if (err) {
+                console.log(err);
                 return callback({message: helper.FAIL, user: null, code: null});
             }
             var count = rows[0].COUNT;
@@ -80,6 +81,7 @@ module.exports = {
                 const queryString10 = 'SELECT landlord_id FROM landlords WHERE latitude = ? AND longitude = ?;';
                 connection.query(queryString10, [latitude, longitude], function(err, rows) {
                     if (err) {
+                        console.log(err);
                         return callback({message: helper.FAIL, user: null, code: null});
                     }
 
@@ -89,11 +91,12 @@ module.exports = {
                     }
                     user['landlord_id'] = rows[0].landlord_id;
 
-                    console.log(user);
+                    // console.log(user);
 
                     const queryString2 = 'INSERT INTO users SET ?;';
                     connection.query(queryString2, user, function(err, rows) {
                         if (err) {
+                            console.log(err);
                             return callback({message: helper.FAIL, user: null, code: null});
                         }
                         const queryString3 = 'SELECT u.username, u.email, l.property_name, u.password, u.landlord_id \
@@ -102,6 +105,7 @@ module.exports = {
                         connection.query(queryString3, user.username, function(err, rows) {
                             // console.log(err);
                             if (err) {
+                                console.log(err);
                                 return callback({message: helper.FAIL, user: null, code: null});
                             }
                             if (res_message == helper.ZERO_RESULTS) {
@@ -112,9 +116,10 @@ module.exports = {
                             const timestamp = moment(new Date()).tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
 
                             const queryString4 = 'INSERT INTO email_verifications SET ?;';
-                            connection.query(queryString4, {username: user.username, timestamp: timestamp}, function(err, rows) {
+                            connection.query(queryString4, {username: user.username, timestamp: timestamp, type: 'Email Verification'}, function(err, rows) {
                                 // console.log(err);
                                 if (err) {
+                                    console.log(err);
                                     return callback({message: helper.FAIL, user: null, code: null});
                                 }
 
@@ -123,6 +128,7 @@ module.exports = {
                                 connection.query(queryString5, user.username, function(err, rows) {
                                     // console.log(err);
                                     if (err) {
+                                        console.log(err);
                                         return callback({message: helper.FAIL, user: null, code: null});
                                     }
 
@@ -131,8 +137,8 @@ module.exports = {
 
                                     const queryString6 = 'UPDATE email_verifications SET code = ? WHERE id = ?;';
                                     connection.query(queryString6, [code, id], function(err, rows) {
-                                        console.log(err);
                                         if (err) {
+                                            console.log(err);
                                             return callback({message: helper.FAIL, user: null});
                                         }
                                         return callback({message: helper.SUCCESS, user: newUser, code: code});
@@ -482,6 +488,80 @@ module.exports = {
                         return callback({message: helper.FAIL, user: originalUser});
                     }
                     return callback({message: helper.SUCCESS, user: stripUser(rows[0])});
+                });
+            });
+        });
+    },
+
+
+
+    verifyEmailAddress : function (connection, query, res, callback) {
+        // console.log(query);
+        if (JSON.stringify(query) == '{}') {
+            // console.log('null_query');
+            // Fail, return
+            return callback({message: helper.MISSING_REQUIRED_FIELDS});
+        }
+        // If any of the required fields is missing, then return
+        if (!query.code) {
+            return callback({message: helper.MISSING_CODE});
+        }
+
+        // Prevent SQL Injection
+        if (/[^a-zA-Z0-9]/.test(query.code)) {
+            return callback({message: helper.WRONG_CODE});
+        }
+        const queryString1 = 'SELECT username, timestamp, type FROM email_verifications WHERE code = ?';
+        connection.query(queryString1, query.code, function(err, rows) {
+            if (err) {
+                console.log(err);
+                return callback({message: helper.FAIL});
+            }
+
+            if (rows.length != 1 || rows[0].type != 'Email Verification') {
+                return callback({message: helper.WRONG_CODE});
+            }
+            var username = rows[0].username;
+            var timestampAfter24hours = moment(rows[0].timestamp).add(1, 'day').tz("America/New_York");
+            var currentTime = moment(new Date()).tz("America/New_York");
+
+            if (currentTime.isAfter(timestampAfter24hours)) {
+                // This code has expired
+                return callback({message: helper.EXPIRED_CODE});
+            }
+
+            const queryString2 = 'SELECT code from email_verifications \
+                                  WHERE username = ? ORDER BY timestamp DESC LIMIT 1;';
+            connection.query(queryString2, username, function(err, rows) {
+                if (err) {
+                    console.log(err);
+                    return callback({message: helper.FAIL});
+                }
+
+                if (rows[0].code != query.code) {
+                    // This code has expired
+                    return callback({message: helper.EXPIRED_CODE});
+                }
+
+                const queryString3 = 'SELECT has_verified_email FROM users WHERE username = ?;';
+                connection.query(queryString3, username, function(err, rows) {
+                    if (err) {
+                        console.log(err);
+                        return callback({message: helper.FAIL});
+                    }
+
+                    if (rows[0].has_verified_email != 0) {
+                        return callback({message: helper.EMAIL_HAS_ALREADY_BEEN_VERIFIED});
+                    }
+
+                    const queryString4 = 'UPDATE users SET has_verified_email = 1 WHERE username = ?;';
+                    connection.query(queryString4, username, function(err, rows) {
+                        if (err) {
+                            console.log(err);
+                            return callback({message: helper.FAIL});
+                        }
+                        return callback({message: helper.SUCCESS});
+                    });
                 });
             });
         });
