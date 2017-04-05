@@ -120,9 +120,14 @@ module.exports = {
 
                             var newUser = rows[0];
                             const timestamp = moment(new Date()).tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
+                            var data = {
+                                username: user.username,
+                                timestamp: timestamp,
+                                type: 'Email Verification'
+                            }
 
                             const queryString4 = 'INSERT INTO email_verifications SET ?;';
-                            connection.query(queryString4, {username: user.username, timestamp: timestamp, type: 'Email Verification'}, function(err, rows) {
+                            connection.query(queryString4, data, function(err, rows) {
                                 // console.log(err);
                                 if (err) {
                                     console.log(err);
@@ -160,7 +165,7 @@ module.exports = {
 
 
     loginUser : function (connection, query, res, callback) {
-        console.log(query);
+        // console.log(query);
         if (JSON.stringify(query) == '{}') {
             // console.log('null_query');
             // Fail, return
@@ -198,29 +203,29 @@ module.exports = {
                     return callback({message: helper.FAIL, user: null});
                 }
 
+                // If the user hasn't verified email, then return
                 if (rows[0].has_verified_email == 0) {
                     return callback({message: helper.PLEASE_VERIFY_EMAIL_FIRST, user: null});
                 }
-            });
 
-            // console.log(username);
-            // console.log(password);
-            const queryString3 = 'SELECT u.username, l.property_name, u.password, u.landlord_id \
-                                  FROM users u, landlords l \
-                                  WHERE u.username=? AND u.landlord_id = l.landlord_id';
-            connection.query(queryString3, user.username, function(err, rows) {
-                // console.log(err);
-                if (err) {
-                    console.log(err);
-                    return callback({message: helper.FAIL, user: null});
-                }
-                var originalPassword = rows[0].password;
-                // console.log(originalPassword);
-                // console.log(user.password);
-                if (originalPassword != user.password) {
-                    return callback({message: helper.WRONG_PASSWORD, user: null});
-                }
-                return callback({message: helper.SUCCESS, user: rows[0]});
+                // If the user has verified, then continue
+                const queryString3 = 'SELECT u.username, l.property_name, u.password, u.landlord_id \
+                                      FROM users u, landlords l \
+                                      WHERE u.username=? AND u.landlord_id = l.landlord_id';
+                connection.query(queryString3, user.username, function(err, rows) {
+                    // console.log(err);
+                    if (err) {
+                        console.log(err);
+                        return callback({message: helper.FAIL, user: null});
+                    }
+                    var originalPassword = rows[0].password;
+                    // console.log(originalPassword);
+                    // console.log(user.password);
+                    if (originalPassword != user.password) {
+                        return callback({message: helper.WRONG_PASSWORD, user: null});
+                    }
+                    return callback({message: helper.SUCCESS, user: rows[0]});
+                });
             });
         });
     },
@@ -595,6 +600,82 @@ module.exports = {
                             return callback({message: helper.FAIL});
                         }
                         return callback({message: helper.SUCCESS});
+                    });
+                });
+            });
+        });
+    },
+
+
+    reverifyEmailAddress : function (connection, query, res, callback) {
+        // console.log(query);
+        if (JSON.stringify(query) == '{}') {
+            // console.log('null_query');
+            // Fail, return
+            return callback({message: helper.MISSING_REQUIRED_FIELDS, email: null});
+        }
+        // If any of the required fields is missing, then return
+        if (!query.username) {
+            return callback({message: helper.MISSING_USERNAME, email: null});
+        }
+
+        const username = connection.escape(helper.toLowerCase(query.username));
+
+        const queryString1 = 'SELECT COUNT(*) AS COUNT FROM users WHERE username=?;';
+        // console.log(queryString1);
+        connection.query(queryString1, username, function(err, rows) {
+            if (err) {
+                console.log(err);
+                return callback({message: helper.FAIL, email: null, code: null});
+            }
+            var count = rows[0].COUNT;
+            if (count != 1) {
+                return callback({message: helper.USER_DOESNT_EXISTS, email: null, code: null});
+            }
+
+            const queryString2 = 'SELECT email FROM users WHERE username = ?;';
+            connection.query(queryString2, username, function(err, rows) {
+                if (err) {
+                    console.log(err);
+                    return callback({message: helper.FAIL, email: null, code: null});
+                }
+                const email = rows[0].email;
+
+                const timestamp = moment(new Date()).tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
+                var data = {
+                    username: username,
+                    timestamp: timestamp,
+                    type: 'Email Verification'
+                }
+
+                const queryString3 = 'INSERT INTO email_verifications SET ?;';
+                connection.query(queryString3, data, function(err, rows) {
+                    // console.log(err);
+                    if (err) {
+                        console.log(err);
+                        return callback({message: helper.FAIL, email: null, code: null});
+                    }
+
+                    const queryString4 = 'SELECT id FROM email_verifications \
+                                          WHERE username = ? ORDER BY timestamp DESC LIMIT 1;';
+                    connection.query(queryString4, username, function(err, rows) {
+                        // console.log(err);
+                        if (err) {
+                            console.log(err);
+                            return callback({message: helper.FAIL, email: null, code: null});
+                        }
+
+                        var id = rows[0].id;
+                        var code = helper.hashPassword(id + username + timestamp);
+
+                        const queryString5 = 'UPDATE email_verifications SET code = ? WHERE id = ?;';
+                        connection.query(queryString5, [code, id], function(err, rows) {
+                            if (err) {
+                                console.log(err);
+                                return callback({message: helper.FAIL, email: null, code: null});
+                            }
+                            return callback({message: helper.SUCCESS, email: email, code: code});
+                        });
                     });
                 });
             });

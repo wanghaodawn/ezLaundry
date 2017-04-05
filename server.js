@@ -693,6 +693,35 @@ app.get('/api/verify_email_address?', (req, res) => {
     });
 });
 
+// Resend verification email
+app.post('/api/reverify_email_address/', (req, res) => {
+    usersModel.reverifyEmailAddress(connection, req.body, res, function(result) {
+        var output = JSON.stringify(helper.stripJSON(result));
+        // Send email to the user's email
+        if (result.message == helper.SUCCESS) {
+            // console.log(transporter);
+            var mailOptions = {
+                from:    emailAddress,
+                to:      result.email.replace(/\'/g, ''),
+                subject: '[ezLaundry] Please Verify Your Email Address Within 24 Hours',
+                html: `<a href=${dns}api/verify_email_address?code=${result.code}><h3>Please Press Here to Verify Your Email Address</h3></a>` // html body
+            };
+
+            // send mail with defined transport object
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.log(error);
+                    return res.send({message: helper.FAILED_SENDING_EMAIL});
+                }
+                console.log('Message %s sent: %s', info.messageId, info.response);
+                return res.send(output);
+            });
+        } else {
+            return res.send(output);
+        }
+    });
+});
+
 // Start the server
 app.listen(port);
 console.log(`Starting server at localhost:${port}`);
