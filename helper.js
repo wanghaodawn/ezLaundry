@@ -28,7 +28,7 @@ module.exports = {
     DELETE_TOO_MANY_ITEMS: 'You cannot enter the number more than current number of items',
     USER_DOESNT_EXISTS: 'This user doesn\'t exist',
     WRONG_PASSWORD: 'The password is wrong',
-    USERNAME_HAS_BEEN_TAKEN: 'This username has already been taken',
+    USERNAME_OR_EMAIL_HAS_BEEN_TAKEN: 'This username or email has already been taken',
     MACHINE_IS_SLEEPING_NOW: 'The machine is sleeping now',
     MACHINE_IS_WORKING_NOW: 'The machine begins to work now',
     MISSING_FIELDS_OF_USER_ADDRESS: 'Please enter the user\'s address',
@@ -43,7 +43,7 @@ module.exports = {
     THERE_IS_A_LANDLORD_IN_THIS_ADDRESS: 'There is a landlord in this address',
     NO_LANDLORDS_IN_THIS_ADDRESS: 'There are no landlords in this address',
     NO_EMAIL_PASSWORD_FOUND: 'Cannot find the email password in local file system',
-    FAILED_SENDING_EMAIL: 'Failed to send the email to landlord',
+    FAILED_SENDING_EMAIL: 'Failed to send the email',
     MISSING_NEW_PASSWORD: 'Mssing new_password',
     MISSING_REPORT_BODY: 'Missing report body',
     // If the string is not null, then change it to lowercase

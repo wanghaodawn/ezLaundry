@@ -19,6 +19,7 @@ const dashboard = require('./dashboard.js');
 
 var app = express();
 const port = 3000;
+const dns = 'http://localhost:3000/'
 
 process.env.TZ = 'EST';
 
@@ -242,7 +243,29 @@ app.get('/logout', (req, res) => {
 app.post('/api/add_user/', (req, res) => {
     usersModel.createUser(GoogleMapAPIKey, connection, req.body, res, function(result) {
         var output = JSON.stringify(helper.stripJSON(result));
-        res.send(output);
+        // Send email to the user's email
+        if (result.message == helper.SUCCESS) {
+            // console.log(transporter);
+            var mailOptions = {
+                from:    emailAddress,
+                to:      result.user.email.replace(/\'/g, ''),
+                subject: '[ezLaundry] Please Verify Your Email Address',
+                html: `<a href=${dns}api/verify_email_address/${result.code}><h3>Please Press Here to Verify Your Email Address</h3></a>` // html body
+            };
+            // console.log(mailOptions);
+
+            // send mail with defined transport object
+            transporter.sendMail(mailOptions, (error, info) => {
+                // console.log(error);
+                if (error) {
+                    return res.send({message: helper.FAILED_SENDING_EMAIL});
+                }
+                console.log('Message %s sent: %s', info.messageId, info.response);
+                return res.send(output);
+            });
+        } else {
+            return res.send(output);
+        }
     });
 });
 
@@ -618,7 +641,7 @@ app.post('/api/send_email_to_landlord/', (req, res) => {
         var mailOptions = {
             from:    emailAddress,
             to:      result.email,
-            subject: `[Maintainese Requested] @ ${result.property_name} by ${req.body.username}`,
+            subject: `[ezLaundry][Maintainese Requested] @ ${result.property_name} by ${req.body.username}`,
             html: `<b>${req.body.report}</b>` // html body
         };
 
@@ -645,8 +668,8 @@ app.post('/api/send_feedback/', (req, res) => {
         // console.log(transporter);
         var mailOptions = {
             from:    emailAddress,
-            to:      result.email,
-            subject: 'Your Feedback Has Been Received',
+            to:      result.email.replace(/\'/g, ''),
+            subject: '[ezLaundry] Your Feedback Has Been Received',
             html: `<b>Your Feedback Has Been Received</b>` // html body
         };
 
@@ -660,6 +683,10 @@ app.post('/api/send_feedback/', (req, res) => {
         return res.send({message: result.message});
     });
 });
+
+// Let the user verify the email address
+// api.get('/api/verify_emailaddress/', (req, res) => {
+// });
 
 // Start the server
 app.listen(port);

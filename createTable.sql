@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(254) NOT NULL,
     password VARCHAR(128) NOT NULL,
     landlord_id INT NOT NULL,
-    has_verified_email BIT NOT NULL,
+    has_verified_email INT NOT NULL,
     PRIMARY KEY(username),
     FOREIGN KEY (landlord_id) REFERENCES landlords(landlord_id) ON DELETE CASCADE
 );
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS email_verifications (
     id INT NOT NULL AUTO_INCREMENT,
     username VARCHAR(40) NOT NULL,
     timestamp DATETIME NOT NULL,
-    code VARCHAR(20),
+    code VARCHAR(128),
     PRIMARY KEY (id),
     FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
 );
