@@ -421,7 +421,7 @@ module.exports = {
 
 
    showAllSchedulesUserTypeAfterNow : function (connection, query, res, callback) {
-       // console.log(query);
+       console.log(query);
        if (JSON.stringify(query) == '{}') {
            // console.log('null_query');
            return callback({message: helper.MISSING_REQUIRED_FIELDS, schedules: null});
@@ -434,9 +434,10 @@ module.exports = {
        }
        const username = connection.escape(helper.toLowerCase(query.username));
        const machine_type = connection.escape(helper.toLowerCase(query.machine_type));
+    //    console.log(username);
 
     //    Get user's latitude and longitude
-       const queryString0 = 'SELECT u.username, u.landlord_id FROM users WHERE username=?;';
+       const queryString0 = 'SELECT u.username, u.landlord_id FROM users u WHERE username=?;';
        connection.query(queryString0, username, function(err, rows) {
         //    console.log(err);
            if (err) {
@@ -446,6 +447,8 @@ module.exports = {
                return callback({message: helper.USER_DOESNT_EXISTS, schedules: null});
            }
            const landlord_id = rows[0].landlord_id;
+
+        //    console.log(landlord_id);
 
            const now = moment(new Date()).tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
         //    console.log(latitude);
@@ -464,7 +467,6 @@ module.exports = {
                                     ) \
                                  ORDER BY s.end_time;';
            connection.query(queryString1, [landlord_id, machine_type], function(err, rows) {
-            //    console.log(err);
             //    console.log(rows);
                if (err) {
                    return callback({message: helper.FAIL, schedules: null});
@@ -525,9 +527,9 @@ module.exports = {
                    return callback({message: helper.USER_DOESNT_EXISTS});
                }
                // Get end_time
-               const time_gap_minutes = 60;
+               const time_gap_seconds = 300;
             //    const end_date = start_date.setMinutes(start_date.getMinutes() + time_gap_minutes);
-               const end_date = start_date.setSeconds(start_date.getSeconds() + time_gap_minutes);
+               const end_date = start_date.setSeconds(start_date.getSeconds() + time_gap_seconds);
                const end_time = moment(end_date).tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
                // console.log(start_time);
                // console.log(end_time);

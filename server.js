@@ -22,6 +22,7 @@ const port = 3000;
 
 process.env.TZ = 'EST';
 
+// Configuration of email
 const emailAddress = 'no.reply.ezlaundry@gmail.com';
 var emailPassword = '';
 var transporter = '';
@@ -40,7 +41,7 @@ helper.getEmailPassword(function (result) {
             }
         });
         console.log(emailAddress);
-        console.log(emailPassword);
+        // console.log(emailPassword);
     }
 });
 
@@ -618,7 +619,35 @@ app.post('/api/send_email_to_landlord/', (req, res) => {
             from:    emailAddress,
             to:      result.email,
             subject: `[Maintainese Requested] @ ${result.property_name} by ${req.body.username}`,
-            html: '<b>Maintainese Requested!</b>' // html body
+            html: `<b>${req.body.report}</b>` // html body
+        };
+
+        // send mail with defined transport object
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                return res.send({message: helper.FAILED_SENDING_EMAIL});
+            }
+            console.log('Message %s sent: %s', info.messageId, info.response);
+        });
+        return res.send({message: result.message});
+    });
+});
+
+// Send us feedback
+app.post('/api/send_feedback/', (req, res) => {
+    feedbacksModel.addFeedback(connection, req.body, res, function(result) {
+        var result = helper.stripJSON(result);
+
+        if (result.message != helper.SUCCESS) {
+            return res.send({message: result.message});
+        }
+
+        // console.log(transporter);
+        var mailOptions = {
+            from:    emailAddress,
+            to:      result.email,
+            subject: 'Your Feedback Has Been Received',
+            html: `<b>Your Feedback Has Been Received</b>` // html body
         };
 
         // send mail with defined transport object

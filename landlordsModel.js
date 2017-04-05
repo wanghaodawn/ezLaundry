@@ -156,6 +156,9 @@ module.exports = {
         if (!query.username) {
             return callback({message: helper.MISSING_USERNAME, email: null});
         }
+        if (!query.report) {
+            return callback({message: helper.MISSING_REPORT_BODY, email: null});
+        }
         const username = connection.escape(helper.toLowerCase(query.username));
 
         // Check whether the address has already has a landlord

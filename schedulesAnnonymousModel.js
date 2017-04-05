@@ -367,7 +367,7 @@ module.exports = {
        const machine_type = connection.escape(helper.toLowerCase(query.machine_type));
 
     //    Get user's latitude and longitude
-       const queryString0 = 'SELECT u.username, u.landlord_id FROM users WHERE username=?;';
+       const queryString0 = 'SELECT u.username, u.landlord_id FROM users u WHERE username=?;';
        connection.query(queryString0, username, function(err, rows) {
         //    console.log(err);
            if (err) {

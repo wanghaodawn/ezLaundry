@@ -1,5 +1,7 @@
 const fs = require('fs');
 var request = require('request');
+const hasha = require('hasha');
+const moment = require('moment-timezone');
 
 module.exports = {
     // Message to be sent to browser
@@ -43,6 +45,7 @@ module.exports = {
     NO_EMAIL_PASSWORD_FOUND: 'Cannot find the email password in local file system',
     FAILED_SENDING_EMAIL: 'Failed to send the email to landlord',
     MISSING_NEW_PASSWORD: 'Mssing new_password',
+    MISSING_REPORT_BODY: 'Missing report body',
     // If the string is not null, then change it to lowercase
     toLowerCase : function (s) {
         if (s) {
@@ -193,5 +196,11 @@ module.exports = {
             result.push(dic);
         }
         return result;
+    },
+
+
+
+    hashPassword : function(str) {
+        return hasha(str);
     }
 }

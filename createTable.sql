@@ -12,10 +12,22 @@ CREATE TABLE IF NOT EXISTS landlords (
 -- Users
 CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(40) NOT NULL,
-    password VARCHAR(20) NOT NULL,
+    email VARCHAR(254) NOT NULL,
+    password VARCHAR(128) NOT NULL,
     landlord_id INT NOT NULL,
+    has_verified_email BIT NOT NULL,
     PRIMARY KEY(username),
     FOREIGN KEY (landlord_id) REFERENCES landlords(landlord_id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE IF NOT EXISTS email_verifications (
+    id INT NOT NULL AUTO_INCREMENT,
+    username VARCHAR(40) NOT NULL,
+    timestamp DATETIME NOT NULL,
+    code VARCHAR(20),
+    PRIMARY KEY (id),
+    FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
 );
 
 
@@ -53,4 +65,14 @@ CREATE TABLE IF NOT EXISTS schedules_annonymous (
     end_time DATETIME NOT NULL,
     PRIMARY KEY(schedule_id),
     FOREIGN KEY (machine_id) REFERENCES machines(machine_id) ON DELETE CASCADE
+);
+
+
+-- Feedback table
+CREATE TABLE IF NOT EXISTS feedbacks (
+    username VARCHAR(40) NOT NULL,
+    text TEXT NOT NULL,
+    timestamp DATETIME NOT NULL,
+    PRIMARY KEY (username, timestamp),
+    FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
 );

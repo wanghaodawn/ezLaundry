@@ -2,7 +2,7 @@ const express = require('express');
 const hbs = require('hbs');
 const fs = require('fs');
 const url = require('url');
-const moment = require('moment');
+const moment = require('moment-timezone');
 
 const helper = require('./helper.js');
 
@@ -42,7 +42,7 @@ module.exports = {
             }
             var user = {
                 'username':      connection.escape(helper.toLowerCase(query.username)),
-                'password':      connection.escape(query.password)
+                'password':      helper.hashPassword(query.username + query.password)
             };
             var res_message = '';
 
@@ -77,7 +77,7 @@ module.exports = {
                     }
 
                     // console.log(rows[0].landlord_id);
-                    if (!rows.length == 0) {
+                    if (rows.length == 0) {
                         return callback({message: helper.NO_MACHINE_THIS_ADDRESS, user: null});
                     }
                     user['landlord_id'] = rows[0].landlord_id;
@@ -110,7 +110,7 @@ module.exports = {
 
 
     loginUser : function (connection, query, res, callback) {
-        // console.log(query);
+        console.log(query);
         if (JSON.stringify(query) == '{}') {
             // console.log('null_query');
             // Fail, return
@@ -126,7 +126,7 @@ module.exports = {
         // Use escape to prevent from SQL Injection
         const user = {
             'username':     connection.escape(helper.toLowerCase(query.username)),
-            'password':     connection.escape(query.password)
+            'password':     helper.hashPassword(query.username + query.password)
         };
         const queryString1 = 'SELECT COUNT(*) AS COUNT FROM users WHERE username=?;';
         // console.log(queryString1);
@@ -166,6 +166,7 @@ module.exports = {
         if (JSON.stringify(query) == '{}') {
             return callback({message: helper.MISSING_REQUIRED_FIELDS});
         }
+        // Check if missing parameters or not
         if (!query.username) {
             return callback({message: helper.MISSING_USERNAME});
         }
@@ -181,7 +182,7 @@ module.exports = {
 
         var user = {
             'username': connection.escape(helper.toLowerCase(query.username)),
-            'new_password': connection.escape(helper.toLowerCase(query.new_password)),
+            'new_password': helper.hashPassword(query.username + query.new_password)
         }
         var address =  helper.toLowerCase(query.address);
         var city = helper.toLowerCase(query.city);
@@ -210,16 +211,13 @@ module.exports = {
                 }
 
                 user['landlord_id'] = rows[0].landlord_id;
-
-                console.log(user);
-
+                // console.log(user);
                 // Update user table
                 const queryString2 = 'UPDATE users SET password = ?, landlord_id = ? WHERE username = ?;';
                 connection.query(queryString2, [user.new_password, user.landlord_id, user.username], function(err, rows) {
                     if (err) {
                         return callback({message: helper.FAIL});
                     }
-
                     return callback({message: helper.SUCCESS});
                 });
             });
