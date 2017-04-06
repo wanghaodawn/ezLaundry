@@ -768,7 +768,7 @@ app.get('/api/reset_password?', (req, res) => {
         if (result.message != helper.SUCCESS) {
             return res.send(result.message);
         }
-        res.render('reset_password.hbs',{
+        return res.render('reset_password.hbs',{
             message: result.message,
             username: result.username,
             code: req.query.code
@@ -781,12 +781,12 @@ app.post('/api/reset_password', (req, res) => {
     console.log(req.body);
     usersModel.resetPassword(connection, req.body, res, function(result) {
         if (result.message != helper.SUCCESS) {
-            res.render('reset_password.hbs',{
+            return res.render('reset_password.hbs',{
                 message: result.message,
                 username: result.username
             });
         }
-        res.send(result.message);
+        return res.send(result.message);
     });
 });
 
