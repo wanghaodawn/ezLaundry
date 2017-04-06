@@ -561,7 +561,7 @@ module.exports = {
         if (/[^a-zA-Z0-9]/.test(query.code)) {
             return callback({message: helper.WRONG_CODE});
         }
-        const queryString1 = 'SELECT username, timestamp, type FROM email_verifications WHERE code = ?';
+        const queryString1 = 'SELECT id, username, timestamp, type FROM email_verifications WHERE code = ?';
         connection.query(queryString1, query.code, function(err, rows) {
             if (err) {
                 console.log(err);
@@ -571,8 +571,10 @@ module.exports = {
             if (rows.length != 1 || rows[0].type != 'Email Verification') {
                 return callback({message: helper.WRONG_CODE});
             }
+            var id = rows[0].id;
             var username = rows[0].username;
-            var timestampAfter24hours = moment(rows[0].timestamp).add(1, 'day').tz("America/New_York");
+            var timestamp = rows[0].timestamp;
+            var timestampAfter24hours = moment(timestamp).add(1, 'day').tz("America/New_York");
             var currentTime = moment(new Date()).tz("America/New_York");
 
             if (currentTime.isAfter(timestampAfter24hours)) {
@@ -580,6 +582,7 @@ module.exports = {
                 return callback({message: helper.EXPIRED_CODE});
             }
 
+            // Only keep the latest email as valid, others are expired
             const queryString2 = 'SELECT code from email_verifications \
                                   WHERE username = ? ORDER BY timestamp DESC LIMIT 1;';
             connection.query(queryString2, username, function(err, rows) {
@@ -610,6 +613,17 @@ module.exports = {
                             console.log(err);
                             return callback({message: helper.FAIL});
                         }
+
+                        // Set the code as expired by changing the timestamp by one day
+                        var timestampBefore24hours = moment(rows[0].timestamp).subtract(1, 'day').tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
+                        const queryString5= 'UPDATE email_verifications SET timestamp = ? WHERE id = ?;';
+                        connection.query(queryString5, [timestampBefore24hours, id], function(err, rows) {
+                            if (err) {
+                                console.log(err);
+                                return callback({message: helper.FAIL});
+                            }
+                            return callback({message: helper.SUCCESS});
+                        });
                         return callback({message: helper.SUCCESS});
                     });
                 });
@@ -668,7 +682,7 @@ module.exports = {
                     }
 
                     const queryString4 = 'SELECT id FROM email_verifications \
-                                          WHERE username = ? ORDER BY timestamp DESC LIMIT 1;';
+                                          WHERE username = ? AND type = "Email Verification" ORDER BY timestamp DESC LIMIT 1;';
                     connection.query(queryString4, username, function(err, rows) {
                         // console.log(err);
                         if (err) {
@@ -797,6 +811,7 @@ module.exports = {
         if (/[^a-zA-Z0-9]/.test(query.code)) {
             return callback({message: helper.WRONG_CODE, username: null});
         }
+
         const queryString1 = 'SELECT id, username, timestamp, type FROM email_verifications WHERE code = ?';
         connection.query(queryString1, query.code, function(err, rows) {
             if (err) {
@@ -808,38 +823,53 @@ module.exports = {
                 return callback({message: helper.WRONG_CODE, username: null});
             }
 
-            var id = rows[0].id;
-            var username = rows[0].username;
-            var timestampAfter24hours = moment(rows[0].timestamp).add(1, 'day').tz("America/New_York");
-            var currentTime = moment(new Date()).tz("America/New_York");
-
-            if (currentTime.isAfter(timestampAfter24hours)) {
-                // This code has expired
-                return callback({message: helper.EXPIRED_CODE, username: null});
-            }
-
+            // Only keep the latest email as valid, others are expired
             const queryString2 = 'SELECT code from email_verifications \
-                                  WHERE username = ? ORDER BY timestamp DESC LIMIT 1;';
+                                  WHERE username = ? AND type = "Forget Password" ORDER BY timestamp DESC LIMIT 1;';
             connection.query(queryString2, username, function(err, rows) {
                 if (err) {
                     console.log(err);
-                    return callback({message: helper.FAIL, username: null});
+                    return callback({message: helper.FAIL});
                 }
 
                 if (rows[0].code != query.code) {
                     // This code has expired
+                    return callback({message: helper.EXPIRED_CODE});
+                }
+
+                var id = rows[0].id;
+                var username = rows[0].username;
+                var timestampAfter24hours = moment(rows[0].timestamp).add(1, 'day').tz("America/New_York");
+                var currentTime = moment(new Date()).tz("America/New_York");
+
+                if (currentTime.isAfter(timestampAfter24hours)) {
+                    // This code has expired
                     return callback({message: helper.EXPIRED_CODE, username: null});
                 }
 
-                // Set the code as expired by changing the timestamp by one day
-                var timestampBefore24hours = moment(rows[0].timestamp).subtract(1, 'day').tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
-                const queryString3 = 'UPDATE email_verifications SET timestamp = ? WHERE id = ?;';
-                connection.query(queryString3, [timestampBefore24hours, id], function(err, rows) {
+                const queryString3 = 'SELECT code from email_verifications \
+                                      WHERE username = ? ORDER BY timestamp DESC LIMIT 1;';
+                connection.query(queryString3, username, function(err, rows) {
                     if (err) {
                         console.log(err);
                         return callback({message: helper.FAIL, username: null});
                     }
-                    return callback({message: helper.SUCCESS, username: username});
+
+                    if (rows[0].code != query.code) {
+                        // This code has expired
+                        return callback({message: helper.EXPIRED_CODE, username: null});
+                    }
+
+                    // Set the code as expired by changing the timestamp by one day
+                    var timestampBefore24hours = moment(rows[0].timestamp).subtract(1, 'day').tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
+                    const queryString4 = 'UPDATE email_verifications SET timestamp = ? WHERE id = ?;';
+                    connection.query(queryString4, [timestampBefore24hours, id], function(err, rows) {
+                        if (err) {
+                            console.log(err);
+                            return callback({message: helper.FAIL, username: null});
+                        }
+                        return callback({message: helper.SUCCESS, username: username});
+                    });
                 });
             });
         });
