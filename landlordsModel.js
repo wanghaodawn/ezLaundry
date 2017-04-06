@@ -163,7 +163,7 @@ module.exports = {
         if (!query.report) {
             return callback({message: helper.MISSING_REPORT_BODY, email: null});
         }
-        const username = connection.escape(helper.toLowerCase(query.username));
+        const username = query.username;
 
         // Check whether the address has already has a landlord
         const queryString1 = 'SELECT l.email, l.property_name FROM landlords l, users u \

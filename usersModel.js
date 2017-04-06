@@ -209,7 +209,7 @@ module.exports = {
                 }
 
                 // If the user has verified, then continue
-                const queryString3 = 'SELECT u.username, l.property_name, u.password, u.landlord_id \
+                const queryString3 = 'SELECT u.username, u.email, l.property_name, u.password, u.landlord_id \
                                       FROM users u, landlords l \
                                       WHERE u.username=? AND u.landlord_id = l.landlord_id';
                 connection.query(queryString3, user.username, function(err, rows) {
@@ -234,20 +234,20 @@ module.exports = {
     updateUserInfo : function(GoogleMapAPIKey, connection, query, res, callback) {
         // console.log(query);
         if (JSON.stringify(query) == '{}') {
-            return callback({message: helper.MISSING_REQUIRED_FIELDS});
+            return callback({message: helper.MISSING_REQUIRED_FIELDS, user: null});
         }
         // Check if missing parameters or not
         if (!query.username) {
-            return callback({message: helper.MISSING_USERNAME});
+            return callback({message: helper.MISSING_USERNAME, user: null});
         }
         if (!query.new_password) {
-            return callback({message: helper.MISSING_NEW_PASSWORD});
+            return callback({message: helper.MISSING_NEW_PASSWORD, user: null});
         }
         if (!query.address) {
-            return callback({message: helper.MISSING_ADDRESS});
+            return callback({message: helper.MISSING_ADDRESS, user: null});
         }
         if (!query.city) {
-            return callback({message: helper.MISSING_CITY});
+            return callback({message: helper.MISSING_CITY, user: null});
         }
 
         var user = {
@@ -274,11 +274,11 @@ module.exports = {
             connection.query(queryString1, [latitude, longitude], function(err, rows) {
                 if (err) {
                     console.log(err);
-                    return callback({message: helper.FAIL});
+                    return callback({message: helper.FAIL, user: null});
                 }
 
                 if (rows.length == 0) {
-                    return callback({message: helper.NO_MACHINE_THIS_ADDRESS});
+                    return callback({message: helper.NO_MACHINE_THIS_ADDRESS, user: null});
                 }
 
                 user['landlord_id'] = rows[0].landlord_id;
@@ -290,7 +290,18 @@ module.exports = {
                         console.log(err);
                         return callback({message: helper.FAIL});
                     }
-                    return callback({message: helper.SUCCESS});
+
+                    const queryString3 = 'SELECT u.username, u.email, l.property_name, u.password, u.landlord_id \
+                                          FROM users u, landlords l \
+                                          WHERE u.username=? AND u.landlord_id = l.landlord_id;';
+                    connection.query(queryString3, user.username, function(err, rows) {
+                        // console.log(err);
+                        if (err) {
+                            console.log(err);
+                            return callback({message: helper.FAIL, user: null});
+                        }
+                        return callback({message: helper.SUCCESS, user: rows[0]});
+                    });
                 });
             });
         });
@@ -679,6 +690,227 @@ module.exports = {
                     });
                 });
             });
+        });
+    },
+
+
+    forgetPassword : function (connection, query, res, callback) {
+        // console.log(query);
+        if (JSON.stringify(query) == '{}') {
+            // console.log('null_query');
+            // Fail, return
+            return callback({message: helper.MISSING_REQUIRED_FIELDS, email: null, code: null});
+        }
+        // If any of the required fields is missing, then return
+        if (!query.username) {
+            return callback({message: helper.MISSING_USERNAME, email: null, code: null});
+        }
+        if (!query.email) {
+            return callback({message: helper.MISSING_EMAIL, email: null, code: null});
+        }
+
+        const username = connection.escape(helper.toLowerCase(query.username));
+        const email = connection.escape(helper.toLowerCase(query.email));
+
+        const queryString1 = 'SELECT COUNT(*) AS COUNT FROM users WHERE username=? AND email=?;';
+        // console.log(queryString1);
+        connection.query(queryString1, [username, email], function(err, rows) {
+            if (err) {
+                console.log(err);
+                return callback({message: helper.FAIL, user: null, email: null, code: null});
+            }
+            var count = rows[0].COUNT;
+            if (count != 1) {
+                // If find dumplicate primary keys in the database, return
+                return callback({message: helper.USER_DOESNT_EXISTS, email: null, code: null});
+            }
+
+            const queryString2 = 'SELECT email FROM users WHERE username = ?;';
+            connection.query(queryString2, username, function(err, rows) {
+                if (err) {
+                    console.log(err);
+                    return callback({message: helper.FAIL, email: null, code: null});
+                }
+                const email = rows[0].email;
+
+                const timestamp = moment(new Date()).tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
+                var data = {
+                    username: username,
+                    timestamp: timestamp,
+                    type: 'Forget Password'
+                }
+
+                const queryString3 = 'INSERT INTO email_verifications SET ?;';
+                connection.query(queryString3, data, function(err, rows) {
+                    if (err) {
+                        console.log(err);
+                        return callback({message: helper.FAIL, email: null, code: null});
+                    }
+
+                    const queryString4 = 'SELECT id FROM email_verifications \
+                                          WHERE username = ? ORDER BY timestamp DESC LIMIT 1;';
+                    connection.query(queryString4, username, function(err, rows) {
+                        // console.log(err);
+                        if (err) {
+                            console.log(err);
+                            return callback({message: helper.FAIL, email: null, code: null});
+                        }
+
+                        var id = rows[0].id;
+                        var code = helper.hashPassword(id + username + timestamp);
+
+                        const queryString5 = 'UPDATE email_verifications SET code = ? WHERE id = ?;';
+                        connection.query(queryString5, [code, id], function(err, rows) {
+                            if (err) {
+                                console.log(err);
+                                return callback({message: helper.FAIL, email: null, code: null});
+                            }
+                            return callback({message: helper.SUCCESS, email: email, code: code});
+                        });
+                    });
+                });
+            });
+        });
+    },
+
+
+
+
+    checkForgetPassword : function (connection, query, res, callback) {
+        // console.log(query);
+        if (JSON.stringify(query) == '{}') {
+            // console.log('null_query');
+            // Fail, return
+            return callback({message: helper.MISSING_REQUIRED_FIELDS, username: null});
+        }
+        // If any of the required fields is missing, then return
+        if (!query.code) {
+            return callback({message: helper.MISSING_CODE, username: null});
+        }
+
+        // Prevent SQL Injection
+        if (/[^a-zA-Z0-9]/.test(query.code)) {
+            return callback({message: helper.WRONG_CODE, username: null});
+        }
+        const queryString1 = 'SELECT username, timestamp, type FROM email_verifications WHERE code = ?';
+        connection.query(queryString1, query.code, function(err, rows) {
+            if (err) {
+                console.log(err);
+                return callback({message: helper.FAIL, username: null});
+            }
+
+            if (rows.length != 1 || rows[0].type != 'Forget Password') {
+                return callback({message: helper.WRONG_CODE, username: null});
+            }
+            var username = rows[0].username;
+            var timestampAfter24hours = moment(rows[0].timestamp).add(1, 'day').tz("America/New_York");
+            var currentTime = moment(new Date()).tz("America/New_York");
+
+            if (currentTime.isAfter(timestampAfter24hours)) {
+                // This code has expired
+                return callback({message: helper.EXPIRED_CODE, username: null});
+            }
+
+            const queryString2 = 'SELECT code from email_verifications \
+                                  WHERE username = ? ORDER BY timestamp DESC LIMIT 1;';
+            connection.query(queryString2, username, function(err, rows) {
+                if (err) {
+                    console.log(err);
+                    return callback({message: helper.FAIL, username: null});
+                }
+
+                if (rows[0].code != query.code) {
+                    // This code has expired
+                    return callback({message: helper.EXPIRED_CODE, username: null});
+                }
+
+                return callback({message: helper.SUCCESS, username: username});
+            });
+        });
+    },
+
+
+    resetPassword : function (connection, query, res, callback) {
+        // console.log(query);
+        if (JSON.stringify(query) == '{}') {
+            // console.log('null_query');
+            // Fail, return
+            return callback({message: helper.MISSING_REQUIRED_FIELDS, username: null});
+        }
+        // If any of the required fields is missing, then return
+        if (!query.password1) {
+            return callback({message: helper.MISSING_NEW_PASSWORD, username: null});
+        }
+        if (!query.password2) {
+            return callback({message: helper.MISSING_CONFIRMED_PASSWORD, username: null});
+        }
+        if (!query.username) {
+            return callback({message: helper.MISSING_USERNAME, username: null});
+        }
+
+        if (query.password1 != query.password2) {
+            return callback({message: helper.TWO_PASSWORDS_DOESNT_MATCH, username: null});
+        }
+
+        const user = {
+            'username':     connection.escape(helper.toLowerCase(query.username)),
+            'password':     helper.hashPassword(query.username + query.password)
+        };
+
+        // Check password length
+        if (query.password1.length < 6 || query.password1.length > 20) {
+            return callback({message: helper.PASSWORD_LENGTH_ERROR, username: username});
+        }
+
+        const queryString1 = 'SELECT COUNT(*) AS COUNT FROM users WHERE username = ?;';
+        connection.query(queryString1, user.usrename, function(err, rows) {
+            if (err) {
+                console.log(err);
+                return callback({message: helper.FAIL, username: username});
+            }
+
+            if (rows[0].COUNT != 1) {
+                return callback({message: helper.USER_DOESNT_EXISTS, username: username});
+            }
+
+            const queryString2 = 'UPDATE users SET password = ? WHERE username = ?;';
+            connection.query(queryString2, [user.password, user.usrename], function(err, rows) {
+                if (err) {
+                    console.log(err);
+                    return callback({message: helper.FAIL, username: username});
+                }
+                return callback({message: helper.SUCCESS, username: username});
+            });
+        });
+    },
+
+
+    checkOldPassword : function (connection, query, res, callback) {
+        if (JSON.stringify(query) == '{}') {
+            // Fail, return
+            return callback({message: helper.MISSING_REQUIRED_FIELDS});
+        }
+        // If any of the required fields is missing, then return
+        if (!query.username) {
+            return callback({message: helper.MISSING_USERNAME});
+        }
+        if (!query.old_password) {
+            return callback({message: helper.MISSING_PASSWORD});
+        }
+
+        const username = connection.escape(helper.toLowerCase(query.username));
+        const password1 = helper.hashPassword(query.username + query.old_password);
+        const queryString1 = 'SELECT COUNT(*) AS COUNT FROM users WHERE username = ? AND password = ?;';
+        connection.query(queryString1, [username, password1], function(err, rows) {
+            if (err) {
+                console.log(err);
+                return callback({message: helper.FAIL});
+            }
+
+            if (rows[0].COUNT != 1) {
+                return callback({message: helper.NOT_EQUAL});
+            }
+            return callback({message: helper.EQUAL});
         });
     }
 };

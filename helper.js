@@ -44,7 +44,7 @@ module.exports = {
     NO_LANDLORDS_IN_THIS_ADDRESS: 'There are no landlords in this address',
     NO_EMAIL_PASSWORD_FOUND: 'Cannot find the email password in local file system',
     FAILED_SENDING_EMAIL: 'Failed to send the email',
-    MISSING_NEW_PASSWORD: 'Mssing new_password',
+    MISSING_NEW_PASSWORD: 'Mssing new password',
     MISSING_REPORT_BODY: 'Missing report body',
     MISSING_CODE: 'Missing the code to activate your email address',
     WRONG_CODE: 'Please enter the correct code',
@@ -52,6 +52,11 @@ module.exports = {
     EMAIL_HAS_ALREADY_BEEN_VERIFIED: 'This address has already been verified',
     WRONG_EMAIL_FORMAT: 'Please enter correct email addresses',
     PLEASE_VERIFY_EMAIL_FIRST: 'Please verify your email first',
+    MISSING_CONFIRMED_PASSWORD: 'Please confirm the password',
+    PASSWORD_LENGTH_ERROR: 'Your password should be 6 to 20 characters',
+    EQUAL: 'EQUAL',
+    NOT_EQUAL: 'NOT EQUAL',
+
     // If the string is not null, then change it to lowercase
     toLowerCase : function (s) {
         if (s) {

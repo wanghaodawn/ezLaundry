@@ -16,6 +16,7 @@ const schedulesModel = require('./schedulesModel.js');
 const landlordsModel = require('./landlordsModel.js');
 const helper = require('./helper.js');
 const dashboard = require('./dashboard.js');
+const feedbacksModel = require('./feedbacksModel.js');
 
 var app = express();
 const port = 3000;
@@ -272,6 +273,15 @@ app.post('/api/add_user/', (req, res) => {
 // Login a user
 app.post('/api/login_user/', (req, res) => {
     usersModel.loginUser(connection, req.body, res, function(result) {
+        var output = JSON.stringify(helper.stripJSON(result));
+        // console.log(output);
+        res.send(output);
+    });
+});
+
+// Check the old password before update user info
+app.post('/api/check_old_password/', (req, res) => {
+    usersModel.checkOldPassword(connection, req.body, res, function(result) {
         var output = JSON.stringify(helper.stripJSON(result));
         // console.log(output);
         res.send(output);
@@ -661,6 +671,7 @@ app.post('/api/send_email_to_landlord/', (req, res) => {
 app.post('/api/send_feedback/', (req, res) => {
     feedbacksModel.addFeedback(connection, req.body, res, function(result) {
         var result = helper.stripJSON(result);
+        // console.log(result);
 
         if (result.message != helper.SUCCESS) {
             return res.send({message: result.message});
@@ -721,6 +732,63 @@ app.post('/api/reverify_email_address/', (req, res) => {
         }
     });
 });
+
+// Forget Password
+app.post('/api/forget_password/', (req, res) => {
+    usersModel.forgetPassword(connection, req.body, res, function(result) {
+        var output = JSON.stringify(helper.stripJSON(result));
+        // Send email to the user's email
+        if (result.message == helper.SUCCESS) {
+            // console.log(transporter);
+            var mailOptions = {
+                from:    emailAddress,
+                to:      result.email.replace(/\'/g, ''),
+                subject: '[ezLaundry] Please Use the Link to Reset Your Password Within 24 Hours',
+                html: `<a href=${dns}api/rest_password?code=${result.code}><h3>Please Press Here to Reset Your Password</h3></a>` // html body
+            };
+
+            // send mail with defined transport object
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.log(error);
+                    return res.send({message: helper.FAILED_SENDING_EMAIL});
+                }
+                console.log('Message %s sent: %s', info.messageId, info.response);
+                return res.send(output);
+            });
+        } else {
+            return res.send(output);
+        }
+    });
+});
+
+// Let the user to reset password
+app.get('/api/rest_password?', (req, res) => {
+    usersModel.checkForgetPassword(connection, req.query, res, function(result) {
+        if (result.message != helper.SUCCESS) {
+            return res.send(result.message);
+        }
+        res.render('reset_password.hbs',{
+            message: result.message,
+            username: result.username
+        });
+    });
+});
+
+// Handle reset password page
+app.post('/api/rest_password?', (req, res) => {
+    console.log(req.body);
+    usersModel.resetPassword(connection, req.query, res, function(result) {
+        if (result.message != helper.SUCCESS) {
+            res.render('reset_password.hbs',{
+                message: result.message,
+                username: result.username
+            });
+        }
+        res.send(result.message);
+    });
+});
+
 
 // Start the server
 app.listen(port);

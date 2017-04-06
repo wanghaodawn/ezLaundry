@@ -24,8 +24,11 @@ module.exports = {
 
         const data = {
             username: connection.escape(helper.toLowerCase(query.username)),
-            text: connection.escape(helper.toLowerCase(query.text)),
+            text: connection.escape(query.text),
+            timestamp: moment(new Date()).tz("America/New_York").format('YYYY-MM-DD HH:mm:ss')
         }
+
+        console.log(data);
 
         const queryString1 = 'INSERT INTO feedbacks SET ?;';
         connection.query(queryString1, data, function(err, rows) {
@@ -33,16 +36,16 @@ module.exports = {
                 console.log(err);
                 return callback({message: helper.FAIL, email: null});
             }
-        });
 
-        const queryString2 = 'SELECT email FROM users WHERE username = ?;';
-        connection.query(queryString1, data.username, function(err, rows) {
-            if (err) {
-                console.log(err);
-                return callback({message: helper.FAIL, email: null});
-            }
+            const queryString2 = 'SELECT email FROM users WHERE username = ?;';
+            connection.query(queryString2, data.username, function(err, rows) {
+                if (err) {
+                    console.log(err);
+                    return callback({message: helper.FAIL, email: null});
+                }
 
-            return callback({message: helper.FAIL, email: rows[0]});
+                return callback({message: helper.SUCCESS, email: rows[0].email});
+            });
         });
     }
 }
