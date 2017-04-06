@@ -744,7 +744,7 @@ app.post('/api/forget_password/', (req, res) => {
                 from:    emailAddress,
                 to:      result.email.replace(/\'/g, ''),
                 subject: '[ezLaundry] Please Use the Link to Reset Your Password Within 24 Hours',
-                html: `<a href=${dns}api/rest_password?code=${result.code}><h3>Please Press Here to Reset Your Password</h3></a>` // html body
+                html: `<a href=${dns}api/reset_password?code=${result.code}><h3>Please Press Here to Reset Your Password</h3></a>` // html body
             };
 
             // send mail with defined transport object
@@ -763,22 +763,23 @@ app.post('/api/forget_password/', (req, res) => {
 });
 
 // Let the user to reset password
-app.get('/api/rest_password?', (req, res) => {
+app.get('/api/reset_password?', (req, res) => {
     usersModel.checkForgetPassword(connection, req.query, res, function(result) {
         if (result.message != helper.SUCCESS) {
             return res.send(result.message);
         }
         res.render('reset_password.hbs',{
             message: result.message,
-            username: result.username
+            username: result.username,
+            code: req.query.code
         });
     });
 });
 
 // Handle reset password page
-app.post('/api/rest_password?', (req, res) => {
+app.post('/api/reset_password', (req, res) => {
     console.log(req.body);
-    usersModel.resetPassword(connection, req.query, res, function(result) {
+    usersModel.resetPassword(connection, req.body, res, function(result) {
         if (result.message != helper.SUCCESS) {
             res.render('reset_password.hbs',{
                 message: result.message,

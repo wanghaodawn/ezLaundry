@@ -709,6 +709,11 @@ module.exports = {
             return callback({message: helper.MISSING_EMAIL, email: null, code: null});
         }
 
+        // Check whether it is an email or not
+        if (!Isemail.validate(query.email)) {
+            return callback({message: helper.WRONG_EMAIL_FORMAT, user: null});
+        }
+
         const username = connection.escape(helper.toLowerCase(query.username));
         const email = connection.escape(helper.toLowerCase(query.email));
 
@@ -792,7 +797,7 @@ module.exports = {
         if (/[^a-zA-Z0-9]/.test(query.code)) {
             return callback({message: helper.WRONG_CODE, username: null});
         }
-        const queryString1 = 'SELECT username, timestamp, type FROM email_verifications WHERE code = ?';
+        const queryString1 = 'SELECT id, username, timestamp, type FROM email_verifications WHERE code = ?';
         connection.query(queryString1, query.code, function(err, rows) {
             if (err) {
                 console.log(err);
@@ -802,6 +807,8 @@ module.exports = {
             if (rows.length != 1 || rows[0].type != 'Forget Password') {
                 return callback({message: helper.WRONG_CODE, username: null});
             }
+
+            var id = rows[0].id;
             var username = rows[0].username;
             var timestampAfter24hours = moment(rows[0].timestamp).add(1, 'day').tz("America/New_York");
             var currentTime = moment(new Date()).tz("America/New_York");
@@ -824,7 +831,16 @@ module.exports = {
                     return callback({message: helper.EXPIRED_CODE, username: null});
                 }
 
-                return callback({message: helper.SUCCESS, username: username});
+                // Set the code as expired by changing the timestamp by one day
+                var timestampBefore24hours = moment(rows[0].timestamp).subtract(1, 'day').tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
+                const queryString3 = 'UPDATE email_verifications SET timestamp = ? WHERE id = ?;';
+                connection.query(queryString3, [timestampBefore24hours, id], function(err, rows) {
+                    if (err) {
+                        console.log(err);
+                        return callback({message: helper.FAIL, username: null});
+                    }
+                    return callback({message: helper.SUCCESS, username: username});
+                });
             });
         });
     },
@@ -853,33 +869,34 @@ module.exports = {
         }
 
         const user = {
-            'username':     connection.escape(helper.toLowerCase(query.username)),
-            'password':     helper.hashPassword(query.username + query.password)
+            'username':     query.username,
+            'password':     helper.hashPassword(query.username.replace(/\'/g, '') + query.password1)
         };
 
         // Check password length
         if (query.password1.length < 6 || query.password1.length > 20) {
-            return callback({message: helper.PASSWORD_LENGTH_ERROR, username: username});
+            return callback({message: helper.PASSWORD_LENGTH_ERROR, username: query.username});
         }
 
         const queryString1 = 'SELECT COUNT(*) AS COUNT FROM users WHERE username = ?;';
-        connection.query(queryString1, user.usrename, function(err, rows) {
+        connection.query(queryString1, query.username, function(err, rows) {
             if (err) {
                 console.log(err);
-                return callback({message: helper.FAIL, username: username});
+                return callback({message: helper.FAIL, username: query.username});
             }
 
+            console.log(rows);
             if (rows[0].COUNT != 1) {
-                return callback({message: helper.USER_DOESNT_EXISTS, username: username});
+                return callback({message: helper.USER_DOESNT_EXISTS, username: query.username});
             }
 
             const queryString2 = 'UPDATE users SET password = ? WHERE username = ?;';
-            connection.query(queryString2, [user.password, user.usrename], function(err, rows) {
+            connection.query(queryString2, [user.password, user.username], function(err, rows) {
                 if (err) {
                     console.log(err);
-                    return callback({message: helper.FAIL, username: username});
+                    return callback({message: helper.FAIL, username: query.username});
                 }
-                return callback({message: helper.SUCCESS, username: username});
+                return callback({message: helper.SUCCESS, username: query.username});
             });
         });
     },
