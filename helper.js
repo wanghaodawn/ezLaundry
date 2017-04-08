@@ -1,5 +1,4 @@
 const fs = require('fs');
-var request = require('request');
 const hasha = require('hasha');
 const moment = require('moment-timezone');
 
