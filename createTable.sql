@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS schedules (
     machine_id INT NOT NULL,
     start_time DATETIME NOT NULL,
     end_time DATETIME NOT NULL,
+    access_code VARCHAR(4) NOT NULL,
     PRIMARY KEY(schedule_id),
     FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE,
     FOREIGN KEY (machine_id) REFERENCES machines(machine_id) ON DELETE CASCADE

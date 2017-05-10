@@ -615,6 +615,7 @@ app.post('/api/show_all_user_schedules_type_after_now/', (req, res) => {
 
 // Quick reservation
 app.post('/api/quick_reservation/', (req, res) => {
+    console.log(req.body);
     schedulesModel.quickResercation(connection, req.body, res, function(result) {
         // console.log(result);
         var output = JSON.stringify(helper.stripJSON(result));

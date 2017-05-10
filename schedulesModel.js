@@ -494,21 +494,21 @@ module.exports = {
 
 
    quickResercation : function (connection, query, res, callback) {
-       // console.log(query);
+       console.log(query);
        if (JSON.stringify(query) == '{}') {
            // console.log('null_query');
-           return callback({message: helper.MISSING_REQUIRED_FIELDS});
+           return callback({message: helper.MISSING_REQUIRED_FIELDS, access_code: null});
        }
        // If any of the required fields is missing, then return
        if (!query.username) {
-           return callback({message: helper.MISSING_USERNAME, schedules: null});
+           return callback({message: helper.MISSING_USERNAME, access_code: null});
        }
        if (!query.machine_id) {
-           return callback({message: helper.MISSING_MACHINE_ID, schedules: null});
+           return callback({message: helper.MISSING_MACHINE_ID, access_code: null});
        }
        // Check if the input numbers are in good format
        if (isNaN(query.machine_id)) {
-           return callback({message: helper.INVALID_NUMBER_FORMAT});
+           return callback({message: helper.INVALID_NUMBER_FORMAT, access_code: null});
        }
        // Get current time in the timezone of the server
        const start_date = new Date();
@@ -522,24 +522,24 @@ module.exports = {
            if (err) {
                // Fail, return
                console.log(err);
-               return callback({message: helper.FAIL});
+               return callback({message: helper.FAIL, access_code: null});
            }
            var count = rows[0].COUNT;
            if (count == 0) {
                // No such machines
-               return callback({message: helper.ITEM_DOESNT_EXIST});
+               return callback({message: helper.ITEM_DOESNT_EXIST, access_code: null});
            }
            const queryString00 = 'SELECT COUNT(*) AS COUNT FROM users WHERE username=?;';
            connection.query(queryString00, username, function(err, rows) {
                if (err) {
                    // Fail, return
                    console.log(err);
-                   return callback({message: helper.FAIL});
+                   return callback({message: helper.FAIL, access_code: null});
                }
                var count = rows[0].COUNT;
                if (count == 0) {
                    // No such machines
-                   return callback({message: helper.USER_DOESNT_EXISTS});
+                   return callback({message: helper.USER_DOESNT_EXISTS, access_code: null});
                }
                // Get end_time
                const time_gap_seconds = 300;
@@ -549,11 +549,14 @@ module.exports = {
                // console.log(start_time);
                // console.log(end_time);
                // Use escape to prevent from SQL Injection
+
+               var access_code = Math.floor(Math.random() * 10000);
                const schedules = {
                    username:   username,
                    machine_id: query.machine_id,
                    start_time: start_time,
-                   end_time:   end_time
+                   end_time:   end_time,
+                   access_code: access_code
                };
                // Check if it is the only machine that the user reserved at that time
                const queryString0 = 'SELECT COUNT(*) AS COUNT \
@@ -568,13 +571,13 @@ module.exports = {
                    schedules.start_time, schedules.end_time], function(err, rows) {
                    if (err) {
                        console.log(err);
-                       return callback({message: helper.FAIL});
+                       return callback({message: helper.FAIL, access_code: null});
                    }
 
                    var count = rows[0].COUNT;
                    if (count != 0) {
                        // The user has reserved other machines at that time
-                       return callback({message: helper.USER_CAN_ONLY_RESERVE_ONE_MACHINE_AT_THE_SAME_TIME});
+                       return callback({message: helper.USER_CAN_ONLY_RESERVE_ONE_MACHINE_AT_THE_SAME_TIME, access_code: null});
                    }
 
                 //    Check if the machine is reserved by other people at that time
@@ -590,12 +593,12 @@ module.exports = {
                        schedules.start_time, schedules.end_time], function(err, rows) {
                        if (err) {
                            console.log(err);
-                           return callback({message: helper.FAIL});
+                           return callback({message: helper.FAIL, access_code: access_code});
                        }
                        var count = rows[0].COUNT;
                        if (count != 0) {
                            // The machine is reserved by other people at that time
-                           return callback({message: helper.MACHINE_IS_NOT_AVAILABLE_AT_THAT_TIME});
+                           return callback({message: helper.MACHINE_IS_NOT_AVAILABLE_AT_THAT_TIME, access_code: null});
                        }
 
                        const queryString2 = 'SELECT COUNT(*) AS COUNT \
@@ -610,12 +613,12 @@ module.exports = {
                            schedules.start_time, schedules.end_time], function(err, rows) {
                            if (err) {
                                console.log(err);
-                               return callback({message: helper.FAIL});
+                               return callback({message: helper.FAIL, access_code: access_code});
                            }
                            var count = rows[0].COUNT;
                            if (count != 0) {
                                // The machine is reserved by other people at that time
-                               return callback({message: helper.MACHINE_IS_NOT_AVAILABLE_AT_THAT_TIME});
+                               return callback({message: helper.MACHINE_IS_NOT_AVAILABLE_AT_THAT_TIME, access_code: null});
                            }
                        });
 
@@ -625,10 +628,10 @@ module.exports = {
                            if (err) {
                                // Fail, return
                                console.log(err);
-                               return callback({message: helper.FAIL});
+                               return callback({message: helper.FAIL, access_code: null});
                            }
                            // Success
-                           return callback({message: helper.SUCCESS});
+                           return callback({message: helper.SUCCESS, access_code: access_code});
                        });
                    });
                });

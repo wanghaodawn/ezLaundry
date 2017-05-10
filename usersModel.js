@@ -615,7 +615,7 @@ module.exports = {
                         }
 
                         // Set the code as expired by changing the timestamp by one day
-                        var timestampBefore24hours = moment(rows[0].timestamp).subtract(1, 'day').tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
+                        var timestampBefore24hours = moment(timestamp).subtract(1, 'day').tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
                         const queryString5= 'UPDATE email_verifications SET timestamp = ? WHERE id = ?;';
                         connection.query(queryString5, [timestampBefore24hours, id], function(err, rows) {
                             if (err) {
@@ -825,7 +825,7 @@ module.exports = {
             var username = rows[0].username;
 
             // Only keep the latest email as valid, others are expired
-            const queryString2 = 'SELECT code from email_verifications \
+            const queryString2 = 'SELECT code, timestamp from email_verifications \
                                   WHERE username = ? AND type = "Forget Password" ORDER BY timestamp DESC LIMIT 1;';
             connection.query(queryString2, username, function(err, rows) {
                 if (err) {
