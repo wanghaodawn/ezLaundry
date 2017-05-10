@@ -430,6 +430,69 @@ module.exports = {
    },
 
 
+   showSchedulesUserTypeAfterNow : function (connection, query, res, callback) {
+       console.log(query);
+       if (JSON.stringify(query) == '{}') {
+           // console.log('null_query');
+           return callback({message: helper.MISSING_REQUIRED_FIELDS, schedules: null});
+       }
+       if (!query.username) {
+           return callback({message: helper.MISSING_USERNAME, schedules: null});
+       }
+       if (!query.machine_type) {
+           return callback({message: helper.MISSING_MACHINE_TYPE, schedules: null});
+       }
+       const username = connection.escape(helper.toLowerCase(query.username));
+       const machine_type = connection.escape(helper.toLowerCase(query.machine_type));
+    //    console.log(username);
+
+    //    Get user's latitude and longitude
+       const queryString0 = 'SELECT u.username, u.landlord_id FROM users u WHERE username=?;';
+       connection.query(queryString0, username, function(err, rows) {
+        //    console.log(err);
+           if (err) {
+               console.log(err);
+               return callback({message: helper.FAIL, schedules: null});
+           }
+           if (rows.length == 0) {
+               return callback({message: helper.USER_DOESNT_EXISTS, schedules: null});
+           }
+           const landlord_id = rows[0].landlord_id;
+
+        //    console.log(landlord_id);
+
+           const now = moment(new Date()).tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
+        //    console.log(latitude);
+        //    console.log(longitude);
+        //    console.log(now);
+        //    console.log(machine_type);
+
+        //    Get all schedules in this location
+           const queryString1 = 'SELECT s.schedule_id, m.machine_id, s.start_time, s.end_time, s.username, s.access_code \
+                                 FROM schedules s INNER JOIN machines m ON s.machine_id = m.machine_id \
+                                 WHERE \
+                                    s.username = ?\
+                                    m.landlord_id = ? \
+                                    AND m.machine_type = ? \
+                                    AND ( \
+                                        s.start_time IS NULL OR DATE(s.start_time) = DATE(NOW()) OR DATE(s.end_time) = DATE(NOW()) \
+                                    ) \
+                                 ORDER BY s.end_time;';
+           connection.query(queryString1, [username, landlord_id, machine_type], function(err, rows) {
+            //    console.log(rows);
+               if (err) {
+                   console.log(err);
+                   return callback({message: helper.FAIL, schedules: null});
+               }
+               result = helper.normalizeSchedules(rows);
+            //    console.log(result);
+
+               return callback({message: helper.SUCCESS, schedules: result});
+           });
+       });
+   },
+
+
 
    showAllSchedulesUserTypeAfterNow : function (connection, query, res, callback) {
        console.log(query);
@@ -469,7 +532,7 @@ module.exports = {
         //    console.log(machine_type);
 
         //    Get all schedules in this location
-           const queryString1 = 'SELECT s.schedule_id, m.machine_id, s.start_time, s.end_time, s.username \
+           const queryString1 = 'SELECT s.schedule_id, m.machine_id, s.start_time, s.end_time, s.username, s.access_code \
                                  FROM schedules s RIGHT JOIN machines m ON s.machine_id = m.machine_id \
                                  WHERE \
                                     m.landlord_id = ? \
@@ -550,7 +613,15 @@ module.exports = {
                // console.log(end_time);
                // Use escape to prevent from SQL Injection
 
-               var access_code = Math.floor(Math.random() * 10000);
+            //    Guarantee the length of access code is 4
+               var access_code = parseInt(Math.floor(Math.random() * 10000));
+               for (var i = access_code.length; i < 4; i++) {
+                   access_code = '0' + access_code;
+               }
+               if (access_code.length > 4) {
+                   access_code = access_code.substring(0, 4);
+               }
+
                const schedules = {
                    username:   username,
                    machine_id: query.machine_id,

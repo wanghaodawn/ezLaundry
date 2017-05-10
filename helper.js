@@ -151,6 +151,7 @@ module.exports = {
             dic.end_time = rows[i].end_time;
             dic.machine_id = rows[i].machine_id;
             dic.username = rows[i].username;
+            dic.access_code = rows[i].access_code;
             result.push(dic);
         }
         return result;
