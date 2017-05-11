@@ -117,8 +117,8 @@ module.exports = {
                     return callback({message: 'Please enter a valid address', latitude: null, longitude: null});
                 }
                 // console.log(body['results'][0]['geometry']['location']);
-                const latitude = body['results'][0]['geometry']['location']['lat'];
-                const longitude = body['results'][0]['geometry']['location']['lng'];
+                const latitude  = Math.round(body['results'][0]['geometry']['location']['lat'] * 10000000) / 10000000;
+                const longitude = Math.round(body['results'][0]['geometry']['location']['lng'] * 10000000) / 10000000;
                 return callback({message: 'Success', latitude: latitude, longitude: longitude});
             } else {
                 console.log(error);

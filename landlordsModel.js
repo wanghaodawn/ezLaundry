@@ -48,6 +48,8 @@ module.exports = {
                 landlord['longitude'] = res.longitude;
             }
 
+            console.log(landlord);
+
             // If the address is incorrect
             if (res.message == helper.INVALID_ADDRESS) {
                 return callback({message: helper.INVALID_ADDRESS});
@@ -163,7 +165,7 @@ module.exports = {
         if (!query.report) {
             return callback({message: helper.MISSING_REPORT_BODY, email: null});
         }
-        const username = query.username;
+        const username = connection.escape(helper.toLowerCase(query.username));
 
         // Check whether the address has already has a landlord
         const queryString1 = 'SELECT l.email, l.property_name FROM landlords l, users u \
@@ -174,6 +176,7 @@ module.exports = {
                 console.log(err);
                 return callback({message: helper.FAIL});
             }
+
             if (rows.length == 0) {
                 // If find dumplicate primary keys in the database, return
                 return callback({message: helper.NO_LANDLORDS_IN_THIS_ADDRESS});

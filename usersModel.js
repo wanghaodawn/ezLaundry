@@ -240,9 +240,9 @@ module.exports = {
         if (!query.username) {
             return callback({message: helper.MISSING_USERNAME, user: null});
         }
-        if (!query.new_password) {
-            return callback({message: helper.MISSING_NEW_PASSWORD, user: null});
-        }
+        // if (!query.new_password) {
+        //     return callback({message: helper.MISSING_NEW_PASSWORD, user: null});
+        // }
         if (!query.address) {
             return callback({message: helper.MISSING_ADDRESS, user: null});
         }

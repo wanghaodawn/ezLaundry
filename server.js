@@ -20,7 +20,7 @@ const feedbacksModel = require('./feedbacksModel.js');
 
 var app = express();
 const port = 3000;
-const dns = 'http://128.237.134.80:3000/'
+const dns = 'http://128.237.128.209:3000/'
 
 process.env.TZ = 'EST';
 
@@ -723,7 +723,7 @@ app.post('/api/send_email_to_landlord/', (req, res) => {
     landlordsModel.sendEmailToLandlord(connection, req.body, res, function(result) {
         var result = helper.stripJSON(result);
 
-        if (result.message != helper.SUCCESS) {
+        if (result.message !== helper.SUCCESS) {
             return res.send({message: result.message});
         }
 
@@ -743,6 +743,7 @@ app.post('/api/send_email_to_landlord/', (req, res) => {
             }
             console.log('Message %s sent: %s', info.messageId, info.response);
         });
+
         return res.send({message: result.message});
     });
 });

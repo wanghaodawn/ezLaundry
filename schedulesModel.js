@@ -71,11 +71,22 @@ module.exports = {
                     // console.log(start_time);
                     // console.log(end_time);
                     // Use escape to prevent from SQL Injection
+
+                    //    Guarantee the length of access code is 4
+                   var access_code = parseInt(Math.floor(Math.random() * 10000));
+                   for (var i = access_code.length; i < 4; i++) {
+                       access_code = '0' + access_code;
+                   }
+                   if (access_code.length > 4) {
+                       access_code = access_code.substring(0, 4);
+                   }
+
                     const schedules = {
                         username:   username,
                         machine_id: query.machine_id,
                         start_time: start_time,
-                        end_time:   end_time
+                        end_time:   end_time,
+                        access_code: access_code
                     };
 
                     // Check if it is the only machine that the user reserved at that time
