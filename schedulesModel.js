@@ -73,7 +73,7 @@ module.exports = {
                     // Use escape to prevent from SQL Injection
 
                     //    Guarantee the length of access code is 4
-                   var access_code = parseInt(Math.floor(Math.random() * 10000));
+                   var access_code = helper.generateAccessCode(username);
                    for (var i = access_code.length; i < 4; i++) {
                        access_code = '0' + access_code;
                    }
@@ -625,7 +625,7 @@ module.exports = {
                // Use escape to prevent from SQL Injection
 
             //    Guarantee the length of access code is 4
-               var access_code = parseInt(Math.floor(Math.random() * 10000));
+               var access_code = helper.generateAccessCode(username);
                for (var i = access_code.length; i < 4; i++) {
                    access_code = '0' + access_code;
                }

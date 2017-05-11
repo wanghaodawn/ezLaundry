@@ -65,6 +65,20 @@ module.exports = {
         return s;
     },
 
+    generateAccessCode : function (s) {
+        if (s) {
+            var hash = 0;
+            for (i = 0; i < s.length; i++) {
+                chr = s.charCodeAt(i);
+                hash  = ((hash << 5) - hash) + chr;
+                hash |= 0;
+            }
+            hash = hash % 10001 - 1;
+            return hash;
+        }
+        return 4732;
+    },
+
     stripJSON : function (obj) {
         // console.log(obj);
         // return JSON.parse(JSON.stringify(obj).replace(/\\"/g, '').replace(/\'/g, ''));

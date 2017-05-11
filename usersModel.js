@@ -119,6 +119,7 @@ module.exports = {
                             }
 
                             var newUser = rows[0];
+
                             const timestamp = moment(new Date()).tz("America/New_York").format('YYYY-MM-DD HH:mm:ss');
                             var data = {
                                 username: user.username,
@@ -224,7 +225,18 @@ module.exports = {
                     if (originalPassword != user.password) {
                         return callback({message: helper.WRONG_PASSWORD, user: null});
                     }
-                    return callback({message: helper.SUCCESS, user: rows[0]});
+
+                    var newUser = rows[0];
+                    var access_code = helper.generateAccessCode(user.username);
+                    for (var i = access_code.length; i < 4; i++) {
+                        access_code = '0' + access_code;
+                    }
+                    if (access_code.length > 4) {
+                        access_code = access_code.substring(0, 4);
+                    }
+                    newUser['access_code'] = access_code;
+
+                    return callback({message: helper.SUCCESS, user: newUser});
                 });
             });
         });
@@ -624,7 +636,6 @@ module.exports = {
                             }
                             return callback({message: helper.SUCCESS});
                         });
-                        return callback({message: helper.SUCCESS});
                     });
                 });
             });
